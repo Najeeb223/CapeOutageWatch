@@ -1,2 +1,2 @@
-# CapeWaterTracker
+# CapeWaterWatch
 Checking for water updates in Cape Town
