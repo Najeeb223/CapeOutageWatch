@@ -1,5 +1,10 @@
 {
   "dependencies": {
     "express": "^5.1.0"
-  }
+  },
+  "scripts": {
+  "start": "node server",  
+  "dev": "node --watch server"
+}
+
 }
