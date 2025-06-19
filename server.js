@@ -19,16 +19,13 @@ app.get('/about', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'about.html'));
 }); */
 
-let posts =  [
-    {id: 1, title: 'Post One'},
-    {id: 2, title: 'Post Two'},
-    {id: 3, title: 'Post Three'}
-];
-app.get('/api/posts', (req, res) => {
-    // res.send - can pass a JS Object and it will get strigifyed as JSON
-    // But the specific json method is prefered - res.json
-    res.json(posts);
 
-});
+const coctAlerts = async () => {
+
+    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+    const data = await res.json();
+    console.log(data);
+}
+coctAlerts().catch(console.error);
 
 app.listen(port, () => console.log(`server is running on port ${port}`));
