@@ -10,14 +10,11 @@ const app = express();
 // Middleware - is a function that runs between the incoming request and outgoing response
 /* app.use(express.static(path.join(__dirname, 'public')));
  */
-/* app.get('/', (req, res) => {
+ app.get('/', (req, res) => {
     // Give you the path to the current file you are in 
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/about', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'about.html'));
-}); */
 
 
 const coctAlerts = async () => {
