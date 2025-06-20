@@ -5,3 +5,4 @@ const coctAlerts = async () => {
     console.log(data);
 }
 coctAlerts().catch(console.error);
+
