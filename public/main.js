@@ -7,7 +7,7 @@ const coctAlerts = async () => {
 
         let output = "";
         data.forEach((alerts, index) => {
-           output += `<li>${alerts.Id}</li>`
+           output += `<li>${alerts.service_area}</li>`
         });
         document.body.innerHTML = output;
     }, 1000);
