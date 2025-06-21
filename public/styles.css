@@ -8,10 +8,23 @@ body {
 
 .planned-alerts-layout {
     display: grid;
-    grid-template-columns: repeat(5, auto);
+    grid-template-columns: repeat(1, auto);
     justify-items: center;
     width: 80%;
     padding: 20px;
 }
 
 /* NB: DO NOT FORGET TO SET MEDIA QUERIES EARLY */
+
+.planned-alert-card {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 20px;
+    height: auto;
+    width: 60%;
+    gap: 5px;
+
+}
