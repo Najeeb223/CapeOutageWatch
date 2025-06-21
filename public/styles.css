@@ -1,7 +1,17 @@
+body {
+    font-family: Verdana;
+}
+
 #CWW-header {
     text-align: center;
 }
 
 .planned-alerts-layout {
     display: grid;
+    grid-template-columns: repeat(5, auto);
+    justify-items: center;
+    width: 80%;
+    padding: 20px;
 }
+
+/* NB: DO NOT FORGET TO SET MEDIA QUERIES EARLY */
