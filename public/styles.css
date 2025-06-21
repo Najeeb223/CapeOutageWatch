@@ -2,6 +2,6 @@
     text-align: center;
 }
 
-table {
-    width: 75%;
+.planned-alerts-layout {
+    display: grid;
 }
