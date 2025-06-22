@@ -4,23 +4,30 @@ const coctAlerts = async () => {
     const data = await res.json();
 
 
-        let output = `<h3>Title</h3>
-                      <h3>Area</h3>
-                      <h3>Location</h3>
-                      <h3>Start</h3>
-                      <h3>Forecasted End</h3>
-                    `;
+        let output = ""; 
         data.forEach((alerts, index) => {
             if(alerts.service_area === "Water & Sanitation"){
-                output += `<p>${alerts.title}</p>
-                           <p>${alerts.area}</p> 
+                output += `<h3>Title</h3>
+                           <p>${alerts.title}</p>
+
+                           <h3>Area</h3>
+                           <p>${alerts.area}</p>
+
+                           <h3>Location</h3>
                            <p>${alerts.location}</p> 
+
+                           <h3>Start Time</h3>                  
                            <p>${alerts.start_timestamp}</p> 
+
+                           <h3>Forecasted End</h3>
                            <p>${alerts.forecast_end_timestamp}</p>    
                 `;
         }
         });
-        document.querySelector(".planned-alert-card").innerHTML = output;
+        for(let output = 0; output < data; output++){
+            document.querySelector(".planned-alerts-layout").innerHTML = output;
+        }
+        
  
     
 }
