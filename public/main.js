@@ -1,10 +1,10 @@
 const coctAlerts = async () => {
 
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-planned.json');
-    const data = await res.json();
+    const plannedAlertData = await res.json();
 
 
-        data.forEach((alerts, index) => {
+    plannedAlertData.forEach((alerts, index) => {
             if(alerts.service_area === "Water & Sanitation"){
 
                 let newElement = document.createElement("div");
@@ -22,7 +22,7 @@ const coctAlerts = async () => {
 
                                         <h3>Forecasted End</h3>
                                         <p>${alerts.forecast_end_timestamp}</p> 
-    `;
+                                        `;
                 document.querySelector(".planned-alerts-layout").appendChild(newElement);
    
         }
