@@ -6,12 +6,21 @@ body {
     text-align: center;
 }
 
-.planned-alerts-layout {
+.planned-alerts-layout > div {
     display: grid;
-    grid-template-columns: repeat(1, auto);
+    grid-template-columns: repeat(2, 1fr);
     justify-items: center;
-    width: 80%;
-    padding: 20px;
+    border: 3px solid black;
+    box-sizing: border-box;
+    border-radius: 20px;
+    height: 450px;
+    width: 40%;
+    gap: 5px;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* NB: DO NOT FORGET TO SET MEDIA QUERIES EARLY */
