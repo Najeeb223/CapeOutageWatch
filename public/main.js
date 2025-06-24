@@ -10,16 +10,12 @@ const coctAlerts = async () => {
                 let newElement = document.createElement("div");
                 newElement.innerHTML = `<h3>Title</h3>
                                         <p>${alerts.title}</p>
-
                                         <h3>Area</h3>
                                         <p>${alerts.area}</p>
-
                                         <h3>Location</h3>
                                         <p>${alerts.location}</p> 
-
                                         <h3>Start Time</h3>                  
                                         <p>${alerts.start_timestamp}</p> 
-
                                         <h3>Forecasted End</h3>
                                         <p>${alerts.forecast_end_timestamp}</p> 
                                         `;
