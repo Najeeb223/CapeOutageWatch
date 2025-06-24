@@ -5,10 +5,10 @@ const coctAlerts = async () => {
 
 
     plannedAlertData.forEach((alerts, index) => {
-            if(alerts.service_area === "Water & Sanitation"){
+            if(alerts.service_area === "Electricity"){
 
                 let newElement = document.createElement("div");
-                newElement.innerHTML = ` <h3>Title</h3>
+                newElement.innerHTML = `<h3>Title</h3>
                                         <p>${alerts.title}</p>
 
                                         <h3>Area</h3>
