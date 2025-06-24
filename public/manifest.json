@@ -1,0 +1,11 @@
+{
+    "name": "CapeOutageAlerts",
+    "short_name": "CapeOutageAlerts",
+    "start_url": "/?home=true",
+    "icons": [],
+    "theme_color": "#000000",
+    "background_color": "#FFFFFF",
+    "display": "fullscreen",
+    "orientation": "potrait"
+
+}
