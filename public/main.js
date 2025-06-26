@@ -43,6 +43,8 @@ const coctAlerts = async () => {
                 let newElement = document.createElement("div");
                 newElement.innerHTML = `<h3>Title</h3>
                                         <p>${alerts.title}</p>
+                                        <h3>Description</h3>
+                                        <p>${alerts.description}</p>
                                         <h3>Area</h3>
                                         <p>${alerts.area}</p>
                                         <h3>Location</h3>
@@ -61,3 +63,20 @@ const coctAlerts = async () => {
 }
 coctAlerts().catch(console.error);
 
+
+
+const testNoti = () => {
+
+    const sendNotificationBtn = document.getElementById("notification-btn");
+
+    sendNotificationBtn.addEventListener("click", () => {
+            Notification.requestPermission().then(perm => {
+                if (perm === "granted") {
+                    new Notification("Example notification")
+                    console.log("Button clicked");
+                }
+            })
+    })
+}
+
+testNoti();
