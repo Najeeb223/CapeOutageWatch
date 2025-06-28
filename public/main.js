@@ -65,6 +65,42 @@ coctAlerts().catch(console.error);
 
 
 
+
+const checkPermission = () => {
+   
+    if(!('serviceWorker' in navigator)) {
+        throw new Error ("No support for service worker!");
+    }
+
+    if(!('Notification' in window)) {
+        throw new Error("No support for Notification API")
+    }
+       
+}
+
+const registerSW = async () => {
+
+    const registration = await navigator.serviceWorker.register('service-worker.js');
+    return registration;
+}
+
+
+
+const requestNotificationPermission = async () => {
+    const permission = await Notification.requestPermission();
+
+    if(permission !== 'granted') {
+        throw new Error("Notification permisson not granted")
+    } else {
+        new Notification("Hello World");
+    }
+}
+
+checkPermission();
+registerSW();
+requestNotificationPermission();
+
+/*
 const testNoti = () => {
 
     const sendNotificationBtn = document.getElementById("notification-btn");
@@ -80,3 +116,4 @@ const testNoti = () => {
 }
 
 testNoti();
+*/
