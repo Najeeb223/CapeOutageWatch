@@ -84,8 +84,8 @@ const registerSW = async () => {
     return registration;
 }
 
+// Requesting for permission immediately on page load
 
-/* - Requesting for permission immediately on page load
 const requestNotificationPermission = async () => {
     const permission = await Notification.requestPermission();
 
@@ -95,10 +95,10 @@ const requestNotificationPermission = async () => {
         new Notification("Hello World");
     }
 }
-*/
+
 checkPermission();
 registerSW();
-//requestNotificationPermission();
+requestNotificationPermission();
 
 
 const testNoti = () => {
