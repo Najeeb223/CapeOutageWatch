@@ -10,7 +10,7 @@ const app = express();
 
 // Setup static folder
 // Middleware - is a function that runs between the incoming request and outgoing response
- app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '.')));
  
 
 
