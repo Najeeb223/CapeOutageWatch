@@ -1,7 +1,9 @@
 
 
 
-    console.log("Install CapeOutageWatch! 1");
+    console.log("Install CapeOutageWatch!");
+
+    
 
 /*  Caching of service worker
 self.addEventListener("install", e => {
