@@ -100,7 +100,7 @@ checkPermission();
 registerSW();
 //requestNotificationPermission();
 
-/*
+
 const testNoti = () => {
 
     const sendNotificationBtn = document.getElementById("notification-btn");
@@ -116,4 +116,3 @@ const testNoti = () => {
 }
 
 testNoti();
-*/
