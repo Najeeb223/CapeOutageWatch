@@ -98,7 +98,6 @@ const requestNotificationPermission = async () => {
 
 checkPermission();
 registerSW();
-requestNotificationPermission();
 
 
 const testNoti = () => {
