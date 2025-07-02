@@ -91,27 +91,20 @@ const requestNotificationPermission = async () => {
 
     if(permission !== 'granted') {
         throw new Error("Notification permisson not granted")
-    } else {
-        new Notification("Hello World");
-    }
+    } 
 }
 
-checkPermission();
-registerSW();
+const main = async () => {
+    checkPermission();
+    const reg = await registerSW();
+    // We can also pass a second parameter with an options object - we can pass icons/vibration patterns extra text 
+    // etc for the notification
+    reg.showNotification("Hello World");
 
 
-const testNoti = () => {
-
-    const sendNotificationBtn = document.getElementById("notification-btn");
-
-    sendNotificationBtn.addEventListener("click", () => {
-            Notification.requestPermission().then(perm => {
-                if (perm === "granted") {
-                    new Notification("Example notification")
-                   
-                }
-            })
-    })
 }
+main();
 
-testNoti();
+
+
+
