@@ -33,10 +33,10 @@ function formatCapeToDate(timestamp) {
 const coctAlerts = async () => {
 
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
-    const plannedAlertData = await res.json();
+    const alertData = await res.json();
 
    
-    plannedAlertData.forEach((alerts, index) => {
+    alertData.forEach((alerts, index) => {
             if(alerts.service_area === "Electricity"){
                 const formattedStartTime = formatCapeToDate(alerts.start_timestamp);
                 const formattedEndTime = formatCapeToDate(alerts.forecast_end_timestamp);
@@ -96,14 +96,13 @@ const requestNotificationPermission = async () => {
 
 const main = async () => {
     checkPermission();
-    const reg = await registerSW();
-    // We can also pass a second parameter with an options object - we can pass icons/vibration patterns extra text 
-    // etc for the notification
-    reg.showNotification("Hello World");
+    await requestNotificationPermission();
+    await registerSW();
+
 
 
 }
-main();
+
 
 
 
