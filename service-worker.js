@@ -1,8 +1,10 @@
 
+    // The service worker goes through a life cycle
 
-
-    console.log("Install CapeOutageWatch!");
-
+self.addEventListener("activate", async (e) => {
+    const subscription = await self.registration.pushManager.subscribe({});
+    console.log(subscription);
+})
     
 
 /*  Caching of service worker
