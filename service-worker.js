@@ -7,7 +7,6 @@ self.addEventListener("activate", async (e) => {
 })
     
 
-
 /*  Caching of service worker
 self.addEventListener("install", e => {
     e.waitUntil(caches.open("static").then(cache => {
