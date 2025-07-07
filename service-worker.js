@@ -37,11 +37,17 @@ self.addEventListener("activate", async (e) => {
     console.log(response);
 })
     
+self.addEventListener("push", e => {
+    self.registration.showNotification("Wohoo!", { body: e.data.text()})
+})
+
+
 /* Public Key:
 BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU
 
 Private Key:
 mV6oxKlW1Gq3Ss1eMoxDN0pp1rKiGi_8Ym5MYH-tY-0 */
+
 
 
 /*  Caching of service worker

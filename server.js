@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, '.')));
 const subDatabase = [];
 app.post("/save-subscription", (req, res) => {
     subDatabase.push(req.body);
-    res.josn({ status: "Success", message: "Subscription saved!" });
+    res.json({ status: "Success", message: "Subscription saved!" });
 })
 
 app.get("/send-notification", (req, res) => {
