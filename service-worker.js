@@ -1,12 +1,35 @@
+// Function to encode the applicationServerKey in base64url due to the JSON websignature
+
+const urlBase64ToUint8Array = base64String => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+    const rawData = atob(base64);
+    const outputArray  = new Uint8Array(rawData.length);
+
+    for(let i = 0; i < rawData.length; i++) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+        return outputArray;
+}
+
 
     // The service worker goes through a life cycle
-
 self.addEventListener("activate", async (e) => {
     // NB: Chrome expects application server key
-    const subscription = await self.registration.pushManager.subscribe({});
+    const subscription = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
+    });
     console.log(subscription);
 })
     
+/* Public Key:
+BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU
+
+Private Key:
+mV6oxKlW1Gq3Ss1eMoxDN0pp1rKiGi_8Ym5MYH-tY-0 */
 
 
 /*  Caching of service worker
