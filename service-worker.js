@@ -2,6 +2,7 @@
     // The service worker goes through a life cycle
 
 self.addEventListener("activate", async (e) => {
+    // NB: Chrome expects application server key
     const subscription = await self.registration.pushManager.subscribe({});
     console.log(subscription);
 })

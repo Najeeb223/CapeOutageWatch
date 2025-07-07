@@ -32,7 +32,7 @@ function formatCapeToDate(timestamp) {
 
 const coctAlerts = async () => {
 
-    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-planned.json');
     const alertData = await res.json();
 
    
