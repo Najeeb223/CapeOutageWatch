@@ -15,6 +15,16 @@ const urlBase64ToUint8Array = base64String => {
         return outputArray;
 }
 
+const saveSubscription = async (subscription) => {
+
+    const response = await fetch('http://localhost:8080/save-subscription', {
+        method: 'post',
+        headers: { 'Content-type': "application/json"},
+        body: JSON.stringify(subscription)
+    })
+
+    return response.json();
+}
 
     // The service worker goes through a life cycle
 self.addEventListener("activate", async (e) => {
@@ -22,7 +32,9 @@ self.addEventListener("activate", async (e) => {
     const subscription = await self.registration.pushManager.subscribe({
         userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
     });
-    console.log(subscription);
+
+    const response = await saveSubscription(subscription);
+    console.log(response);
 })
     
 /* Public Key:
