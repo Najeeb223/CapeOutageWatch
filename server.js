@@ -34,6 +34,7 @@ app.post("/save-subscription", (req, res) => {
 })
 
 app.get("/send-notification", (req, res) => {
+    console.log("Subscription data:", subDatabase[0]);
     webpush.sendNotification(subDatabase[0], "Hello World");
     res.json({ "status": "Success", "message": "Message sent to the push service" });
 })
