@@ -38,6 +38,9 @@ self.addEventListener("activate", async (e) => {
 })
     
 self.addEventListener("push", e => {
+    console.log("🔔 Push received", e);  // <-- Add this
+    const data = e.data ? e.data.text() : "No payload";
+    console.log("🔎 Push data:", data);
     self.registration.showNotification("Wohoo!", { body: e.data.text() })
 })
 

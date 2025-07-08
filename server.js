@@ -27,13 +27,23 @@ webpush.setVapidDetails(
 // Middleware - is a function that runs between the incoming request and outgoing response
 app.use(express.static(path.join(__dirname, '.')));
 
+app.use(express.json());
+
+app.get("/", (req, res) => {
+    res.send("Hello World");
+})
+
 const subDatabase = [];
+
+
 app.post("/save-subscription", (req, res) => {
+    console.log("Received subscription:", req.body);
     subDatabase.push(req.body);
     res.json({ status: "Success", message: "Subscription saved!" });
 })
 
 app.get("/send-notification", (req, res) => {
+    console.log("Subscription object:", subDatabase[0]);
     webpush.sendNotification(subDatabase[0], "Hello World");
     res.json({ "status": "Success", "message": "Message sent to the push service" });
 })
