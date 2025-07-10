@@ -1,6 +1,8 @@
 const express = require('express');
 const port = process.env.PORT || 8000;
 const webpush = require('web-push');
+const cors = require("cors");
+app.use(cors());
 
 //utility to help with file paths
 const path = require('path');
