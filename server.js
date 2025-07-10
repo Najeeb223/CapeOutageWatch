@@ -1,13 +1,14 @@
 const express = require('express');
 const port = process.env.PORT || 8000;
 const webpush = require('web-push');
-const cors = require("cors");
-app.use(cors());
+
 
 //utility to help with file paths
 const path = require('path');
 
 const app = express();
+const cors = require("cors");
+app.use(cors());
 /* Public Key:
 BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU
 

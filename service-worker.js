@@ -17,7 +17,7 @@ const urlBase64ToUint8Array = base64String => {
 
 const saveSubscription = async (subscription) => {
 
-    const response = await fetch('https://capeoutagewatch.onrender.com', {
+    const response = await fetch('https://capeoutagewatch.onrender.com/save-subcription', {
         method: 'post',
         headers: { 'Content-type': "application/json"},
         body: JSON.stringify(subscription)
