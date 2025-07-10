@@ -37,13 +37,23 @@ self.addEventListener("activate", async (e) => {
     console.log(response);
 })
 
-    
 self.addEventListener("push", e => {
     console.log("🔔 Push received", e); 
     const data = e.data ? e.data.text() : "No payload";
     console.log("🔎 Push data:", data);
-    self.registration.showNotification("Wohoo!", { body: e.data.text() })
-})
+    
+    const notificationPromise = self.registration.showNotification("Cape Town Alert", { 
+        body: data,
+        requireInteraction: true, // Forces notification to stay until user interacts
+        silent: false
+    }).then(() => {
+        console.log("✅ Notification displayed successfully");
+    }).catch(err => {
+        console.error("❌ Notification failed:", err);
+    });
+    
+    e.waitUntil(notificationPromise);
+});
 
 
 /* Public Key:
