@@ -31,6 +31,8 @@ webpush.setVapidDetails(
 app.use(express.static(path.join(__dirname, '.')));
 
 app.use(express.json());
+const schedule = require('node-schedule');
+
 
 app.get("/", (req, res) => {
     res.send("Hello World");
@@ -51,5 +53,17 @@ app.get("/send-notification", (req, res) => {
     res.json({ "status": "Success", "message": "Message sent to the push service" });
 })
 
+
+const notifyAlerts = () => {
+    const job = schedule.scheduleJob('* 10 * * * *', async () => {
+    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+    const alertData = await res.json();
+
+    alertData.forEach((alerts, index) => {
+        
+    })
+});
+}
+notifyAlerts();
 
 app.listen(port, () => console.log(`server is running on port ${port}`));
