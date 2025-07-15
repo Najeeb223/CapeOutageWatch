@@ -1,7 +1,7 @@
 const express = require('express');
 const port = process.env.PORT || 8000;
 const webpush = require('web-push');
-
+const sqlite3 = require('sqlite3').verbose();
 
 //utility to help with file paths
 const path = require('path');
@@ -9,6 +9,7 @@ const path = require('path');
 const app = express();
 const cors = require("cors");
 app.use(cors());
+
 /* Public Key:
 BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU
 
@@ -53,6 +54,35 @@ app.get("/send-notification", (req, res) => {
     res.json({ "status": "Success", "message": "Message sent to the push service" });
 })
 
+let sql;
+
+const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, (err) => {
+        if(err) return console.error(err.message);
+});
+
+sql = `CREATE TABLE alerts (alertId INTEGER PRIMARY KEY)`;
+db.run(sql);
+
+const insertAlertsToDb = async () => {
+   
+    let insertAlertsSql;
+    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+    const alertData = await res.json();
+    insertAlertsSql = `INSERT INTO alerts(alertId) VALUES (?)`;
+
+    alertData.forEach((alerts, index) => {
+       
+        db.run(insertAlertsSql, [alerts.Id], (err) => {
+        if(err) return console.error(err.message);
+        }); 
+
+        
+
+    })
+   
+}
+insertAlertsToDb();
+
 
 const notifyAlerts = () => {
   
@@ -64,10 +94,11 @@ const notifyAlerts = () => {
     alertData.forEach((alerts, index) => {
         if(alerts.service_area === "Water & Sanitation"){ 
            
-            seenAlertsArray.push(alerts.Id);
-            const newAlerts = alertData.filter(newAlert => {
+            const newAlerts = alertData.filter((newAlerts) => {
+                if(alerts.Id !== newAlerts.Id) {
 
-            })
+                }
+            });
         }
         
     })
