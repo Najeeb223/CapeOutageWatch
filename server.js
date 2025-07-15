@@ -76,10 +76,9 @@ const insertAlertsToDb = async () => {
         if(err) return console.error(err.message);
         }); 
 
-        
 
     })
-   
+
 }
 insertAlertsToDb();
 
