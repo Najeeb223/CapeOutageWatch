@@ -66,16 +66,22 @@ db.run(sql);
 const insertAlertsToDb = async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
-    const insertAlertsSql = `INSERT INTO alerts(alertId) VALUES (?)`;
 
     alertData.forEach(alert => {
-        db.run(insertAlertsSql, [alert.Id], err => {
-            if (err) console.error(err.message);
+        const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
+        db.get(checkSql, [alert.Id], (err, row) => {
+            if (err) return console.error(err.message);
+            if (row.count === 0) {
+                const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
+                db.run(insertSql, [alert.Id], err => {
+                    if (err) console.error(err.message);
+                });
+            }
         });
     });
 };
-
 insertAlertsToDb();
+
 
 
 
