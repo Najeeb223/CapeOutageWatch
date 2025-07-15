@@ -60,6 +60,15 @@ const notifyAlerts = () => {
     const alertData = await res.json();
 
     alertData.forEach((alerts, index) => {
+        if(alerts.service_area === "Water & Sanitation"){ 
+            const seenAlertsArray = [];
+            let oldAlerObject = alerts.Id
+            let newAlerObject = alerts.Id
+
+            if (JSON.stringify(oldAlerObject) !== JSON.stringify(newAlerObject)) {
+                seenAlertsArray.push(newAlerObject);
+            }
+        }
         
     })
 });
