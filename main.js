@@ -37,7 +37,7 @@ const coctAlerts = async () => {
 
    
     alertData.forEach((alerts, index) => {
-            if(alerts.service_area === "Water & Sanitation"){
+            if(alerts.service_area === "Water & Sanitation" || "Electricity"){
                 const formattedStartTime = formatCapeToDate(alerts.start_timestamp);
                 const formattedEndTime = formatCapeToDate(alerts.forecast_end_timestamp);
                 let newElement = document.createElement("div");
