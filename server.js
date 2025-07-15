@@ -60,27 +60,23 @@ const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, 
         if(err) return console.error(err.message);
 });
 
-sql = `CREATE TABLE alerts (alertId INTEGER PRIMARY KEY)`;
+sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
 
 const insertAlertsToDb = async () => {
-   
-    let insertAlertsSql;
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
-    insertAlertsSql = `INSERT INTO alerts(alertId) VALUES (?)`;
+    const insertAlertsSql = `INSERT INTO alerts(alertId) VALUES (?)`;
 
-    alertData.forEach((alerts, index) => {
-       
-        db.run(insertAlertsSql, [alerts.Id], (err) => {
-        if(err) return console.error(err.message);
-        }); 
+    alertData.forEach(alert => {
+        db.run(insertAlertsSql, [alert.Id], err => {
+            if (err) console.error(err.message);
+        });
+    });
+};
 
-
-    })
-
-}
 insertAlertsToDb();
+
 
 
 const notifyAlerts = () => {
