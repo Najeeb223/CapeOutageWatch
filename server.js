@@ -55,19 +55,19 @@ app.get("/send-notification", (req, res) => {
 
 
 const notifyAlerts = () => {
+  
+    const seenAlertsArray = [];
     const job = schedule.scheduleJob('* 10 * * * *', async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
 
     alertData.forEach((alerts, index) => {
         if(alerts.service_area === "Water & Sanitation"){ 
-            const seenAlertsArray = [];
-            let oldAlerObject = alerts.Id
-            let newAlerObject = alerts.Id
+           
+            seenAlertsArray.push(alerts.Id);
+            const newAlerts = alertData.filter(newAlert => {
 
-            if (JSON.stringify(oldAlerObject) !== JSON.stringify(newAlerObject)) {
-                seenAlertsArray.push(newAlerObject);
-            }
+            })
         }
         
     })
