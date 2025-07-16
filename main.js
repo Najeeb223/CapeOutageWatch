@@ -65,45 +65,72 @@ coctAlerts().catch(console.error);
 
 
 
-
 const checkPermission = () => {
-   
-    if(!('serviceWorker' in navigator)) {
-        throw new Error ("No support for service worker!");
+    if (!('serviceWorker' in navigator)) {
+        throw new Error("No support for service worker!");
     }
 
-    if(!('Notification' in window)) {
-        throw new Error("No support for Notification API")
+    if (!('Notification' in window)) {
+        throw new Error("No support for Notification API");
     }
-       
-}
+
+    if (!('PushManager' in window)) {
+        throw new Error("No support for Push API");
+    }
+};
 
 const registerSW = async () => {
-
     const registration = await navigator.serviceWorker.register('service-worker.js');
     return registration;
-}
-
-// Requesting for permission immediately on page load
+};
 
 const requestNotificationPermission = async () => {
     const permission = await Notification.requestPermission();
 
-    if(permission !== 'granted') {
-        throw new Error("Notification permisson not granted")
-    } 
-}
+    if (permission !== 'granted') {
+        throw new Error("Notification permission not granted");
+    }
+};
+
+// Converts the VAPID public key to a format the browser understands
+const urlBase64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; i++) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+};
+
+// Sends the subscription object to the backend server to be saved in DB
+const saveSubscription = async (subscription) => {
+    const response = await fetch('https://capeoutagewatch.onrender.com/save-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscription)
+    });
+
+    return response.json();
+};
 
 const main = async () => {
     checkPermission();
     await requestNotificationPermission();
-    await registerSW();
+    const registration = await registerSW();
 
+    const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
+    });
 
+    const response = await saveSubscription(subscription);
+    console.log("✅ Subscription saved:", response);
+};
 
-}
-
-
-
-
-
+main();

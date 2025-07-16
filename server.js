@@ -39,16 +39,62 @@ app.get("/", (req, res) => {
     res.send("Hello World");
 })
 
+let sql;
+const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, (err) => {
+        if(err) return console.error(err.message);
+});
+sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
+db.run(sql);
+/*
+app.use(bodyParser.json()); // Use body-parser to parse JSON requests
+
+    app.post('/save-subscription', (req, res) => {
+        const subscription = req.body;
+        if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
+            return res.status(400).json({ error: 'Invalid subscription object' });
+        }
+
+        const { endpoint } = subscription;
+        const { p256dh, auth } = subscription.keys;
+
+        // Insert the subscription into the database
+        db.run(`INSERT OR IGNORE INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)`,
+            [endpoint, p256dh, auth],
+            function (err) {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).json({ error: 'Failed to save subscription' });
+                }
+                res.status(201).json({ message: 'Subscription saved successfully', id: this.lastID });
+            }
+        );
+    });
+
+*/
 
 const saveSubscriptions = () => {
     
-    const saveSubSql = `CREATE TABLE IF NOT EXISTS subscriptions (subscriptionId INTEGER PRIMARY KEY)`
-    app.post("/save-subscription", (req, res) => {
-    console.log("Received subscription:", req.body);
-    db.run(saveSubSql, [req.body], err => {
-        if (err) console.error(err.message);
-    });
-    res.json({ status: "Success", message: "Subscription saved!" });
+    sql = `CREATE TABLE IF NOT EXISTS subscriptions (endpoint, p256dh, auth)`;
+    db.run(sql);
+    app.post('/save-subscription', (req, res) => {
+        const subscription = req.body;
+        if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
+            return res.status(400).json({ error: 'Invalid subscription object' });
+        }
+
+        const { endpoint } = subscription;
+        const { p256dh, auth } = subscription.keys;
+
+        db.run(`INSERT OR IGNORE INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)`,
+            [endpoint, p256dh, auth],
+            function (err) {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).json({ error: 'Failed to save subscription' });
+                }
+                res.status(201).json({ message: 'Subscription saved successfully', id: this.lastID });
+            }
+        );
     });
 }
 saveSubscriptions();
@@ -61,15 +107,6 @@ app.get("/send-notification", (req, res) => {
     res.json({ "status": "Success", "message": "Message sent to the push service" });
 })
 
-
-let sql;
-
-const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, (err) => {
-        if(err) return console.error(err.message);
-});
-
-sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
-db.run(sql);
 
 
 const insertAlertsToDb = async () => {
