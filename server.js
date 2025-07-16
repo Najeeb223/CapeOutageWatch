@@ -39,20 +39,28 @@ app.get("/", (req, res) => {
     res.send("Hello World");
 })
 
-const subDatabase = [];
 
-
-app.post("/save-subscription", (req, res) => {
+const saveSubscriptions = () => {
+    
+    const saveSubSql = `CREATE TABLE IF NOT EXISTS subscriptions (subscriptionId INTEGER PRIMARY KEY)`
+    app.post("/save-subscription", (req, res) => {
     console.log("Received subscription:", req.body);
-    subDatabase.push(req.body);
+    db.run(saveSubSql, [req.body], err => {
+        if (err) console.error(err.message);
+    });
     res.json({ status: "Success", message: "Subscription saved!" });
-})
+    });
+}
+saveSubscriptions();
+
+
 
 app.get("/send-notification", (req, res) => {
     console.log("Subscription object:", subDatabase[0]);
     webpush.sendNotification(subDatabase[0], "Hello World");
     res.json({ "status": "Success", "message": "Message sent to the push service" });
 })
+
 
 let sql;
 
@@ -62,6 +70,7 @@ const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, 
 
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
+
 
 const insertAlertsToDb = async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
@@ -87,22 +96,24 @@ insertAlertsToDb();
 
 const notifyAlerts = () => {
   
-    const seenAlertsArray = [];
     const job = schedule.scheduleJob('* 10 * * * *', async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
 
-    alertData.forEach((alerts, index) => {
-        if(alerts.service_area === "Water & Sanitation"){ 
-           
-            const newAlerts = alertData.filter((newAlerts) => {
-                if(alerts.Id !== newAlerts.Id) {
-
-                }
-            });
-        }
-        
-    })
+    alertData.forEach(alert => {
+            const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
+            db.get(checkSql, [alert.Id], (err, row) => {
+                if (err) return console.error(err.message);
+                if (row.count === 0) {
+                
+                app.get("/send-notification", (req, res) => {
+                    console.log("Subscription object:", subDatabase[0]);
+                    webpush.sendNotification(subDatabase[0], "Hello World");
+                    res.json({ "status": "Success", "message": "Message sent to the push service" });
+                })
+            }
+        });
+    });
 });
 }
 notifyAlerts();

@@ -1,5 +1,4 @@
 // Function to encode the applicationServerKey in base64url due to the JSON websignature
-
 const urlBase64ToUint8Array = base64String => {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
@@ -44,7 +43,7 @@ self.addEventListener("push", e => {
     
     const notificationPromise = self.registration.showNotification("Cape Town Alert", { 
         body: data,
-        requireInteraction: true, // Forces notification to stay until user interacts
+        requireInteraction: true, 
         silent: false
     }).then(() => {
         console.log("✅ Notification displayed successfully");
