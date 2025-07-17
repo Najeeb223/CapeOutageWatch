@@ -132,7 +132,9 @@ insertAlertsToDb();
 
 
 const notifyAlerts = () => {
-  
+
+    let sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
+    db.run(sentAlertsSql);
     const job = schedule.scheduleJob('* 10 * * * *', async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
@@ -142,10 +144,14 @@ const notifyAlerts = () => {
             db.get(checkSql, [alert.Id], (err, row) => {
                 if (err) return console.error(err.message);
                 if (row.count === 0) {
-                
-                app.get("/send-notification", (req, res) => {
-                    console.log("Subscription object:", subDatabase[0]);
-                    webpush.sendNotification(subDatabase[0], "Hello World");
+                    const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
+                    db.run(insertNewAlertSql, [alert.Id], err => {
+                        if (err) console.error(err.message);
+                    });
+                    // Remove the line below
+                    app.get("/send-notification", (req, res) => {
+                    console.log("Subscription object:", insertNewAlertSql);
+                    webpush.sendNotification(insertNewAlertSql, "New COCT Unplaned Alert");
                     res.json({ "status": "Success", "message": "Message sent to the push service" });
                 })
             }
