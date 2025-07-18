@@ -101,11 +101,40 @@ saveSubscriptions();
 
 
 
+// TEST ROUTE - Optional, for development/debugging only
 app.get("/send-notification", (req, res) => {
-    console.log("Subscription object:", subDatabase[0]);
-    webpush.sendNotification(subDatabase[0], "Hello World");
-    res.json({ "status": "Success", "message": "Message sent to the push service" });
-})
+    db.get(`SELECT * FROM subscriptions LIMIT 1`, (err, row) => {
+        if (err) {
+            console.error("DB error:", err.message);
+            return res.status(500).json({ error: "Failed to fetch subscription" });
+        }
+
+        if (!row) {
+            console.warn("No subscriptions found in DB");
+            return res.status(404).json({ error: "No subscriptions found" });
+        }
+
+        const subscription = {
+            endpoint: row.endpoint,
+            keys: {
+                p256dh: row.p256dh,
+                auth: row.auth
+            }
+        };
+
+        webpush.sendNotification(subscription, "🚨 Test Notification")
+            .then(() => {
+                console.log("Test notification sent");
+                res.json({ status: "Success", message: "Test push sent" });
+            })
+            .catch(err => {
+                console.error("Push failed:", err);
+                res.status(500).json({ error: "Push failed" });
+            });
+    });
+});
+
+
 
 
 
@@ -135,7 +164,7 @@ const notifyAlerts = () => {
 
     let sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
     db.run(sentAlertsSql);
-    const job = schedule.scheduleJob('* 10 * * * *', async () => {
+    const job = schedule.scheduleJob('*/10 * * * *', async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
 
@@ -144,6 +173,8 @@ const notifyAlerts = () => {
             db.get(checkSql, [alert.Id], (err, row) => {
                 if (err) return console.error(err.message);
                 if (row.count === 0) {
+                    const subscriptionQuery = `SELECT COUNT(*) as count FROM subscriptions WHERE endpoint, p256dh, auth = ?, ?, ?`;
+                    db.get(subscriptionQuery, )
                     const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
                     db.run(insertNewAlertSql, [alert.Id], err => {
                         if (err) console.error(err.message);
