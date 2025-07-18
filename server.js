@@ -122,7 +122,7 @@ app.get("/send-notification", (req, res) => {
             }
         };
 
-        webpush.sendNotification(subscription, "🚨 Test Notification")
+        webpush.sendNotification(subscription, "Test Notification")
             .then(() => {
                 console.log("Test notification sent");
                 res.json({ status: "Success", message: "Test push sent" });
