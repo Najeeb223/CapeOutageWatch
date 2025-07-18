@@ -148,12 +148,10 @@ const notifyAlerts = () => {
                     db.run(insertNewAlertSql, [alert.Id], err => {
                         if (err) console.error(err.message);
                     });
-                    // Remove the line below
-                    app.get("/send-notification", (req, res) => {
                     console.log("Subscription object:", insertNewAlertSql);
                     webpush.sendNotification(insertNewAlertSql, "New COCT Unplaned Alert");
                     res.json({ "status": "Success", "message": "Message sent to the push service" });
-                })
+                
             }
         });
     });
