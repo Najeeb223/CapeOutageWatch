@@ -158,36 +158,60 @@ const insertAlertsToDb = async () => {
 insertAlertsToDb();
 
 
-
-
 const notifyAlerts = () => {
-
-    let sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
+    const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
     db.run(sentAlertsSql);
-    const job = schedule.scheduleJob('*/10 * * * *', async () => {
-    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
-    const alertData = await res.json();
 
-    alertData.forEach(alert => {
-            const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
-            db.get(checkSql, [alert.Id], (err, row) => {
-                if (err) return console.error(err.message);
-                if (row.count === 0) {
-                    const subscriptionQuery = `SELECT COUNT(*) as count FROM subscriptions WHERE endpoint, p256dh, auth = ?, ?, ?`;
-                    db.get(subscriptionQuery, )
-                    const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
-                    db.run(insertNewAlertSql, [alert.Id], err => {
-                        if (err) console.error(err.message);
-                    });
-                    console.log("Subscription object:", insertNewAlertSql);
-                    webpush.sendNotification(insertNewAlertSql, "New COCT Unplaned Alert");
-                    res.json({ "status": "Success", "message": "Message sent to the push service" });
-                
-            }
-        });
+    const job = schedule.scheduleJob('*/10 * * * *', async () => {
+        try {
+            const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+            const alertData = await res.json();
+
+            alertData.forEach(alert => {
+                const checkSql = `SELECT COUNT(*) as count FROM sent_alerts WHERE sentAlertId = ?`;
+                db.get(checkSql, [alert.Id], (err, row) => {
+                    if (err) return console.error(err.message);
+                    if (row.count === 0) {
+                        // Insert the new alert ID into sent_alerts
+                        const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
+                        db.run(insertNewAlertSql, [alert.Id], err => {
+                            if (err) return console.error(err.message);
+                        });
+
+                        // Get all subscriptions
+                        db.all(`SELECT * FROM subscriptions`, (err, subscriptions) => {
+                            if (err) return console.error("Failed to fetch subscriptions:", err.message);
+                            if (!subscriptions || subscriptions.length === 0) {
+                                console.warn("No subscriptions found");
+                                return;
+                            }
+
+                            // Send notification to each subscription
+                            subscriptions.forEach(sub => {
+                                const subscription = {
+                                    endpoint: sub.endpoint,
+                                    keys: {
+                                        p256dh: sub.p256dh,
+                                        auth: sub.auth
+                                    }
+                                };
+
+                                webpush.sendNotification(subscription, "🚨 New COCT Unplanned Alert")
+                                    .then(() => console.log("Notification sent to:", subscription.endpoint))
+                                    .catch(err => console.error("Push error:", err));
+                            });
+                        });
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Error in notifyAlerts job:", error.message);
+        }
     });
-});
-}
+};
+
 notifyAlerts();
+
+
 
 app.listen(port, () => console.log(`server is running on port ${port}`));
