@@ -74,7 +74,7 @@ app.use(bodyParser.json()); // Use body-parser to parse JSON requests
 
 const saveSubscriptions = () => {
     
-    sql = `CREATE TABLE IF NOT EXISTS subscriptions (endpoint, p256dh, auth)`;
+    sql = `CREATE TABLE IF NOT EXISTS subscriptions (PRIMARY KEY endpoint, p256dh, auth)`;
     db.run(sql);
     app.post('/save-subscription', (req, res) => {
         const subscription = req.body;
@@ -98,42 +98,6 @@ const saveSubscriptions = () => {
     });
 }
 saveSubscriptions();
-
-
-
-// TEST ROUTE - Optional, for development/debugging only
-app.get("/send-notification", (req, res) => {
-    db.get(`SELECT * FROM subscriptions LIMIT 1`, (err, row) => {
-        if (err) {
-            console.error("DB error:", err.message);
-            return res.status(500).json({ error: "Failed to fetch subscription" });
-        }
-
-        if (!row) {
-            console.warn("No subscriptions found in DB");
-            return res.status(404).json({ error: "No subscriptions found" });
-        }
-
-        const subscription = {
-            endpoint: row.endpoint,
-            keys: {
-                p256dh: row.p256dh,
-                auth: row.auth
-            }
-        };
-
-        webpush.sendNotification(subscription, "Test Notification")
-            .then(() => {
-                console.log("Test notification sent");
-                res.json({ status: "Success", message: "Test push sent" });
-            })
-            .catch(err => {
-                console.error("Push failed:", err);
-                res.status(500).json({ error: "Push failed" });
-            });
-    });
-});
-
 
 
 
