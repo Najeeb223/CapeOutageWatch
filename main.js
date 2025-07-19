@@ -130,7 +130,7 @@ const main = async () => {
     });
 
     const response = await saveSubscription(subscription);
-    console.log("✅ Subscription saved:", response);
+    console.log("Subscription saved:", response);
 };
 
 main();

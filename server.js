@@ -45,36 +45,11 @@ const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, 
 });
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
-/*
-app.use(bodyParser.json()); // Use body-parser to parse JSON requests
 
-    app.post('/save-subscription', (req, res) => {
-        const subscription = req.body;
-        if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
-            return res.status(400).json({ error: 'Invalid subscription object' });
-        }
-
-        const { endpoint } = subscription;
-        const { p256dh, auth } = subscription.keys;
-
-        // Insert the subscription into the database
-        db.run(`INSERT OR IGNORE INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)`,
-            [endpoint, p256dh, auth],
-            function (err) {
-                if (err) {
-                    console.error(err.message);
-                    return res.status(500).json({ error: 'Failed to save subscription' });
-                }
-                res.status(201).json({ message: 'Subscription saved successfully', id: this.lastID });
-            }
-        );
-    });
-
-*/
 
 const saveSubscriptions = () => {
     
-    sql = `CREATE TABLE IF NOT EXISTS subscriptions (PRIMARY KEY endpoint, p256dh, auth)`;
+    sql = `CREATE TABLE IF NOT EXISTS subscriptions (endpoint PRIMARY KEY, p256dh, auth)`;
     db.run(sql);
     app.post('/save-subscription', (req, res) => {
         const subscription = req.body;
@@ -136,13 +111,11 @@ const notifyAlerts = () => {
                 db.get(checkSql, [alert.Id], (err, row) => {
                     if (err) return console.error(err.message);
                     if (row.count === 0) {
-                        // Insert the new alert ID into sent_alerts
                         const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
                         db.run(insertNewAlertSql, [alert.Id], err => {
                             if (err) return console.error(err.message);
                         });
 
-                        // Get all subscriptions
                         db.all(`SELECT * FROM subscriptions`, (err, subscriptions) => {
                             if (err) return console.error("Failed to fetch subscriptions:", err.message);
                             if (!subscriptions || subscriptions.length === 0) {
@@ -150,7 +123,6 @@ const notifyAlerts = () => {
                                 return;
                             }
 
-                            // Send notification to each subscription
                             subscriptions.forEach(sub => {
                                 const subscription = {
                                     endpoint: sub.endpoint,
@@ -160,9 +132,29 @@ const notifyAlerts = () => {
                                     }
                                 };
 
-                                webpush.sendNotification(subscription, "🚨 New COCT Unplanned Alert")
-                                    .then(() => console.log("Notification sent to:", subscription.endpoint))
-                                    .catch(err => console.error("Push error:", err));
+                                const maxAttempts = 3;
+                                let attempts = 0;
+
+                                const sendWithRetry = async () => {
+                                    try {
+                                        await webpush.sendNotification(subscription, "🚨 New COCT Unplanned Alert");
+                                        console.log("Notification sent to:", subscription.endpoint);
+                                    } catch (err) {
+                                        attempts++;
+                                        console.error(`Push error (attempt ${attempts}):`, err);
+
+                                        if (attempts >= maxAttempts || (err.statusCode && err.statusCode < 500)) {
+                                            console.error("Giving up on:", subscription.endpoint);
+                                            return;
+                                        }
+
+                                        const delay = Math.pow(2, attempts) * 1000;
+                                        console.log(`Retrying in ${delay}ms...`);
+                                        setTimeout(sendWithRetry, delay);
+                                    }
+                                };
+
+                                sendWithRetry();
                             });
                         });
                     }
@@ -175,6 +167,7 @@ const notifyAlerts = () => {
 };
 
 notifyAlerts();
+
 
 
 
