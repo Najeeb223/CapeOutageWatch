@@ -3,16 +3,16 @@
 self.addEventListener("push", e => {
     console.log("🔔 Push received", e); 
     const data = e.data ? e.data.text() : "No payload";
-    console.log("🔎 Push data:", data);
+    console.log("Push data:", data);
     
     const notificationPromise = self.registration.showNotification("Cape Town Alert", { 
         body: data,
         requireInteraction: true, 
         silent: false
     }).then(() => {
-        console.log("✅ Notification displayed successfully");
+        console.log("Notification displayed successfully");
     }).catch(err => {
-        console.error("❌ Notification failed:", err);
+        console.error("Notification failed:", err);
     });
     
     e.waitUntil(notificationPromise);
