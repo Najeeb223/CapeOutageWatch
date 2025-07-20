@@ -81,20 +81,29 @@ const insertAlertsToDb = async () => {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const alertData = await res.json();
 
-    alertData.forEach(alert => {
-        const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
-        db.get(checkSql, [alert.Id], (err, row) => {
-            if (err) return console.error(err.message);
-            if (row.count === 0) {
-                const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
-                db.run(insertSql, [alert.Id], err => {
-                    if (err) console.error(err.message);
-                });
-            }
+    const insertPromises = alertData.map(alert => {
+        return new Promise((resolve, reject) => {
+            const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
+            db.get(checkSql, [alert.Id], (err, row) => {
+                if (err) return reject(err);
+                if (row.count === 0) {
+                    const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
+                    db.run(insertSql, [alert.Id], err => {
+                        if (err) return reject(err);
+                        resolve(); // inserted
+                    });
+                } else {
+                    resolve(); // already exists
+                }
+            });
         });
     });
+
+    await Promise.all(insertPromises);
 };
-insertAlertsToDb();
+
+insertAlertsToDb().then(() => notifyAlerts());
+
 
 
 const notifyAlerts = () => {
@@ -140,7 +149,7 @@ const notifyAlerts = () => {
                                         await webpush.sendNotification(subscription, {
                                             "title": "Water Outage Alert",
                                             "body": "New unplanned water outage reported by City of Cape Town.",
-                                            "icon": "images/manifest-icon-192.maskable.png"
+                                            "icon": "/images/manifest-icon-512.maskable.png"
                                           });
                                         console.log("Notification sent to:", subscription.endpoint);
                                     } catch (err) {
