@@ -42,6 +42,9 @@ app.get("/", (req, res) => {
 let sql;
 const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, (err) => {
         if(err) return console.error(err.message);
+        saveSubscriptions();
+        console.log("Using DB at:", path.resolve('./capeoutagewatch.db'));
+ 
 });
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
@@ -52,6 +55,11 @@ const saveSubscriptions = () => {
     sql = `CREATE TABLE IF NOT EXISTS subscriptions (endpoint PRIMARY KEY, p256dh, auth)`;
     db.run(sql);
     app.post('/save-subscription', (req, res) => {
+        if (err) {
+            console.error("❌ Failed to create subscriptions table:", err.message);
+          } else {
+            console.log("✅ Subscriptions table created (or already exists)");
+          }
         const subscription = req.body;
         if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
             return res.status(400).json({ error: 'Invalid subscription object' });
@@ -90,10 +98,10 @@ const insertAlertsToDb = async () => {
                     const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
                     db.run(insertSql, [alert.Id], err => {
                         if (err) return reject(err);
-                        resolve(); // inserted
+                        resolve();
                     });
                 } else {
-                    resolve(); // already exists
+                    resolve(); 
                 }
             });
         });

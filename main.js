@@ -134,3 +134,12 @@ const main = async () => {
 };
 
 main();
+
+
+const searchArea = async () => {
+
+    const searchAreaBtn = document.getElementById("search-area-btn");
+
+}
+
+searchArea();

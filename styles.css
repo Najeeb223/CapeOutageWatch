@@ -50,7 +50,22 @@ body {
 
 }
 
-#notification-btn {
-    cursor: pointer;
+#area-search-filter {
+    display: grid;
+    justify-items: center;
+    margin-top: 30px;
+    
+}
 
+#area-search {
+    border-radius: 5px; 
+    margin-bottom: 15px;
+    width: 22vw;  
+    height: 20px; 
+}
+
+#search-area-btn {
+    cursor: pointer;
+    margin-bottom: 40px;
+    
 }
