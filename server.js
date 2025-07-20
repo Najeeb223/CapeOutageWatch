@@ -41,46 +41,67 @@ app.get("/", (req, res) => {
 
 let sql;
 const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, (err) => {
-        if(err) return console.error(err.message);
+        if(err) return console.error("❌ DB connection error:", err.message);
+        console.log("✅ Connected to SQLite DB");
         saveSubscriptions();
-        console.log("Using DB at:", path.resolve('./capeoutagewatch.db'));
- 
+
 });
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
 
 
 const saveSubscriptions = () => {
-    
-    sql = `CREATE TABLE IF NOT EXISTS subscriptions (endpoint PRIMARY KEY, p256dh, auth)`;
-    db.run(sql);
-    app.post('/save-subscription', (req, res) => {
+  const sql = `CREATE TABLE IF NOT EXISTS subscriptions (
+    endpoint TEXT PRIMARY KEY,
+    p256dh TEXT,
+    auth TEXT
+  )`;
+
+  // Create the subscriptions table and handle any creation errors
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("❌ Failed to create subscriptions table:", err.message);
+    } else {
+      console.log("✅ Subscriptions table created (or already exists)");
+    }
+  });
+
+  // Define the POST route to save subscriptions
+  app.post('/save-subscription', (req, res) => {
+    const subscription = req.body;
+
+    if (
+      !subscription ||
+      !subscription.endpoint ||
+      !subscription.keys ||
+      !subscription.keys.p256dh ||
+      !subscription.keys.auth
+    ) {
+      return res.status(400).json({ error: 'Invalid subscription object' });
+    }
+
+    const { endpoint } = subscription;
+    const { p256dh, auth } = subscription.keys;
+
+    db.run(
+      `INSERT OR IGNORE INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)`,
+      [endpoint, p256dh, auth],
+      function (err) {
         if (err) {
-            console.error("❌ Failed to create subscriptions table:", err.message);
-          } else {
-            console.log("✅ Subscriptions table created (or already exists)");
-          }
-        const subscription = req.body;
-        if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
-            return res.status(400).json({ error: 'Invalid subscription object' });
+          console.error("❌ Failed to save subscription:", err.message);
+          return res.status(500).json({ error: 'Failed to save subscription' });
         }
+        res.status(201).json({
+          message: 'Subscription saved successfully',
+          id: this.lastID,
+        });
+      }
+    );
+  });
+};
 
-        const { endpoint } = subscription;
-        const { p256dh, auth } = subscription.keys;
-
-        db.run(`INSERT OR IGNORE INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)`,
-            [endpoint, p256dh, auth],
-            function (err) {
-                if (err) {
-                    console.error(err.message);
-                    return res.status(500).json({ error: 'Failed to save subscription' });
-                }
-                res.status(201).json({ message: 'Subscription saved successfully', id: this.lastID });
-            }
-        );
-    });
-}
 saveSubscriptions();
+
 
 
 
