@@ -136,7 +136,7 @@ const main = async () => {
 main().catch(console.error);
 
 
-
+/*
 const searchArea = async () => {
 
     const searchAreaBtn = document.getElementById("search-area-btn");
@@ -147,3 +147,4 @@ const searchArea = async () => {
 }
 
 searchArea();
+*/
