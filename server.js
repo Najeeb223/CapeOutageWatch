@@ -180,7 +180,7 @@ const notifyAlerts = () => {
                                 const sendWithRetry = async () => {
                                     try {
                                       const payload = JSON.stringify({
-                                        title: "Water Outage Alert",
+                                        title: "Cape Outage Alert",
                                         body: "New unplanned water outage reported by City of Cape Town.",
                                         icon: "/images/manifest-icon-512.maskable.png"
                                       });
