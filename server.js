@@ -40,12 +40,16 @@ app.get("/", (req, res) => {
 })
 
 let sql;
-const db = new sqlite3.Database('./capeoutagewatch.db', sqlite3.OPEN_READWRITE, (err) => {
-        if(err) return console.error("❌ DB connection error:", err.message);
-        console.log("✅ Connected to SQLite DB");
-        saveSubscriptions();
+const dbPath = path.resolve(__dirname, 'capeoutagewatch.db');
 
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+    if (err) {
+        return console.error("❌ DB connection error:", err.message);
+    }
+    console.log("✅ Connected to SQLite DB at:", dbPath);
+    saveSubscriptions();
 });
+
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
 
