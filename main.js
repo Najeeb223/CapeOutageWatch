@@ -37,7 +37,7 @@ const coctAlerts = async () => {
 
    
     alertData.forEach((alerts, index) => {
-            if(alerts.service_area === "Water & Sanitation" || "Electricity"){
+            if(alerts.service_area === "Water & Sanitation" || alerts.service_area === "Electricity"){
                 const formattedStartTime = formatCapeToDate(alerts.start_timestamp);
                 const formattedEndTime = formatCapeToDate(alerts.forecast_end_timestamp);
                 let newElement = document.createElement("div");
@@ -80,7 +80,7 @@ const checkPermission = () => {
 };
 
 const registerSW = async () => {
-    const registration = await navigator.serviceWorker.register('service-worker.js');
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
     return registration;
 };
 
@@ -130,10 +130,11 @@ const main = async () => {
     });
 
     const response = await saveSubscription(subscription);
-    console.log("Subscription saved:", response);
+    console.log("✅ Subscription saved:", response);
 };
 
-main();
+main().catch(console.error);
+
 
 
 const searchArea = async () => {

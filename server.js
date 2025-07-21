@@ -29,7 +29,7 @@ webpush.setVapidDetails(
 
 // Setup static folder
 // Middleware - is a function that runs between the incoming request and outgoing response
-app.use(express.static(path.join(__dirname, '.')));
+app.use(express.static(__dirname));
 
 app.use(express.json());
 const schedule = require('node-schedule');
@@ -66,9 +66,10 @@ const saveSubscriptions = () => {
     }
   });
 
-  // Define the POST route to save subscriptions
   app.post('/save-subscription', (req, res) => {
     const subscription = req.body;
+    console.log("📩 Incoming subscription POST request:");
+    console.log(JSON.stringify(subscription, null, 2));
 
     if (
       !subscription ||
@@ -207,7 +208,6 @@ const notifyAlerts = () => {
     });
 };
 
-notifyAlerts();
 
 
 
