@@ -179,12 +179,14 @@ const notifyAlerts = () => {
 
                                 const sendWithRetry = async () => {
                                     try {
-                                        await webpush.sendNotification(subscription, {
-                                            "title": "Water Outage Alert",
-                                            "body": "New unplanned water outage reported by City of Cape Town.",
-                                            "icon": "/images/manifest-icon-512.maskable.png"
-                                          });
-                                        console.log("Notification sent to:", subscription.endpoint);
+                                      const payload = JSON.stringify({
+                                        title: "Water Outage Alert",
+                                        body: "New unplanned water outage reported by City of Cape Town.",
+                                        icon: "/images/manifest-icon-512.maskable.png"
+                                      });
+                                  
+                                      await webpush.sendNotification(subscription, payload);
+                                      console.log("Notification sent to:", subscription.endpoint);
                                     } catch (err) {
                                         attempts++;
                                         console.error(`Push error (attempt ${attempts}):`, err);
