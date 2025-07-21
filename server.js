@@ -186,7 +186,7 @@ const notifyAlerts = () => {
                                       });
                                   
                                       await webpush.sendNotification(subscription, payload);
-                                      console.log("Notification sent to:", subscription.endpoint);
+                                      console.log(`📨 Alert ${alert.Id} sent ✅`);
                                     } catch (err) {
                                         attempts++;
                                         console.error(`Push error (attempt ${attempts}):`, err);
