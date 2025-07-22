@@ -142,8 +142,7 @@ const searchArea = async () => {
     const searchAreaBtn = document.getElementById("search-area-btn");
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
     const areaAlertData = await res.json();
-
-
+    
 }
 
 searchArea();
