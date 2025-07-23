@@ -144,6 +144,5 @@ const searchArea = async () => {
     const areaAlertData = await res.json();
     
 }
-
 searchArea();
 */
