@@ -27,8 +27,6 @@ webpush.setVapidDetails(
 
 )
 
-// Setup static folder
-// Middleware - is a function that runs between the incoming request and outgoing response
 app.use(express.static(__dirname));
 
 app.use(express.json());
