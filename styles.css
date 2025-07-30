@@ -75,6 +75,6 @@ body {
     margin-bottom: 40px;
 }
 
-.planned-alerts-layout > button {
+.view-alert-btn {
     cursor: pointer;
 }
