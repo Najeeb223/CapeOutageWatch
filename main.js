@@ -168,15 +168,17 @@ const main = async () => {
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
         });
-        const response = await saveSubscription(subscription);
-        console.log("✅ Subscription saved:", response);
+        console.log("📬 New subscription created");
     } else {
-        console.log("🔔 Existing subscription found, skipping subscribe.");
+        console.log("🔔 Existing subscription found, syncing with server");
     }
-    
-    // Initialize SPA routing to render correct view on page load
+
+    const response = await saveSubscription(subscription);
+    console.log("✅ Subscription saved:", response);
+
     handleRouting();
 };
+
 
 main().catch(console.error);
 
