@@ -135,7 +135,7 @@ const main = async () => {
 
 main().catch(console.error);
 
-
+/*
 const installApp = () => {
 
     let installPrompt = null;
@@ -160,6 +160,7 @@ const installApp = () => {
 
 }
 installApp();
+*/
 
 /*
 const searchArea = async () => {
