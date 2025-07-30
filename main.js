@@ -151,7 +151,7 @@ const installApp = () => {
         if (!installPrompt) {
           return;
         }
-        const result = await installPrompt.prompt();
+        const result = await installP`rompt.prompt();
         console.log(`Install prompt was: ${result.outcome}`);
         installPrompt = null;
         installButton.setAttribute("hidden", "");
