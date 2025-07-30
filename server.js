@@ -47,6 +47,16 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
 
+const createSentAlertsTable = () => {
+  const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
+  db.run(sentAlertsSql, (err) => {
+    if (err) {
+      console.error("❌ Failed to create sent_alerts table:", err.message);
+    } else {
+      console.log("✅ sent_alerts table created (or already exists)");
+    }
+  });
+};
 createSentAlertsTable();
 
 const saveSubscriptions = () => {
@@ -132,17 +142,6 @@ const insertAlertsToDb = async () => {
 };
 
 insertAlertsToDb().then(() => notifyAlerts());
-
-const createSentAlertsTable = () => {
-  const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
-  db.run(sentAlertsSql, (err) => {
-    if (err) {
-      console.error("❌ Failed to create sent_alerts table:", err.message);
-    } else {
-      console.log("✅ sent_alerts table created (or already exists)");
-    }
-  });
-};
 
 
 const notifyAlerts = () => {
