@@ -10,11 +10,7 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 
-/* Public Key:
-BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU
 
-Private Key:
-mV6oxKlW1Gq3Ss1eMoxDN0pp1rKiGi_8Ym5MYH-tY-0 */
 const apiKeys = {
     publicKey: "BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU",
     privateKey: "mV6oxKlW1Gq3Ss1eMoxDN0pp1rKiGi_8Ym5MYH-tY-0"
@@ -51,6 +47,7 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
 sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
 db.run(sql);
 
+createSentAlertsTable();
 
 const saveSubscriptions = () => {
   const sql = `CREATE TABLE IF NOT EXISTS subscriptions (
@@ -87,7 +84,8 @@ const saveSubscriptions = () => {
     const { p256dh, auth } = subscription.keys;
 
     db.run(
-      `INSERT OR IGNORE INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)`,
+      `INSERT INTO subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)
+       ON CONFLICT(endpoint) DO UPDATE SET p256dh = excluded.p256dh, auth = excluded.auth`,
       [endpoint, p256dh, auth],
       function (err) {
         if (err) {
@@ -135,81 +133,114 @@ const insertAlertsToDb = async () => {
 
 insertAlertsToDb().then(() => notifyAlerts());
 
+const createSentAlertsTable = () => {
+  const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
+  db.run(sentAlertsSql, (err) => {
+    if (err) {
+      console.error("❌ Failed to create sent_alerts table:", err.message);
+    } else {
+      console.log("✅ sent_alerts table created (or already exists)");
+    }
+  });
+};
 
 
 const notifyAlerts = () => {
-    const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
-    db.run(sentAlertsSql);
 
-    const job = schedule.scheduleJob('*/10 * * * *', async () => {
-        try {
-            const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
-            const alertData = await res.json();
 
-            alertData.forEach(alert => {
-                const checkSql = `SELECT COUNT(*) as count FROM sent_alerts WHERE sentAlertId = ?`;
-                db.get(checkSql, [alert.Id], (err, row) => {
-                    if (err) return console.error(err.message);
-                    if (row.count === 0) {
-                        const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
-                        db.run(insertNewAlertSql, [alert.Id], err => {
-                            if (err) return console.error(err.message);
-                        });
+  const job = schedule.scheduleJob('*/10 * * * *', async () => {
+    try {
+      await insertAlertsToDb();
 
-                        db.all(`SELECT * FROM subscriptions`, (err, subscriptions) => {
-                            if (err) return console.error("Failed to fetch subscriptions:", err.message);
-                            if (!subscriptions || subscriptions.length === 0) {
-                                console.warn("No subscriptions found");
-                                return;
-                            }
-
-                            subscriptions.forEach(sub => {
-                                const subscription = {
-                                    endpoint: sub.endpoint,
-                                    keys: {
-                                        p256dh: sub.p256dh,
-                                        auth: sub.auth
-                                    }
-                                };
-
-                                const maxAttempts = 3;
-                                let attempts = 0;
-
-                                const sendWithRetry = async () => {
-                                    try {
-                                      const payload = JSON.stringify({
-                                        title: "Cape Outage Alert",
-                                        body: "New unplanned water outage reported by City of Cape Town.",
-                                        icon: "/images/manifest-icon-512.maskable.png"
-                                      });
-                                  
-                                      await webpush.sendNotification(subscription, payload);
-                                      console.log(`📨 Alert ${alert.Id} sent ✅`);
-                                    } catch (err) {
-                                        attempts++;
-                                        console.error(`Push error (attempt ${attempts}):`, err);
-
-                                        if (attempts >= maxAttempts || (err.statusCode && err.statusCode < 500)) {
-                                            console.error("Giving up on:", subscription.endpoint);
-                                            return;
-                                        }
-
-                                        const delay = Math.pow(2, attempts) * 1000;
-                                        console.log(`Retrying in ${delay}ms...`);
-                                        setTimeout(sendWithRetry, delay);
-                                    }
-                                };
-
-                                sendWithRetry();
-                            });
-                        });
-                    }
-                });
-            });
-        } catch (error) {
-            console.error("Error in notifyAlerts job:", error.message);
+      db.all(`SELECT * FROM alerts`, (err, alertData) => {
+        if (err) {
+          console.error("❌ Failed to fetch alerts from DB:", err.message);
+          return;
         }
-    });
+
+        if (!alertData || alertData.length === 0) {
+          console.warn("⚠️ No alerts found in DB.");
+          return;
+        }
+
+        alertData.forEach(alert => {
+          const checkSql = `SELECT COUNT(*) as count FROM sent_alerts WHERE sentAlertId = ?`;
+          db.get(checkSql, [alert.Id], (err, row) => {
+            if (err) return console.error("❌ Check alert error:", err.message);
+            if (row.count === 0) {
+              const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
+              db.run(insertNewAlertSql, [alert.Id], err => {
+                if (err) return console.error("❌ Insert sent_alert failed:", err.message);
+              });
+
+              db.all(`SELECT * FROM subscriptions`, (err, subscriptions) => {
+                if (err) return console.error("❌ Failed to fetch subscriptions:", err.message);
+                if (!subscriptions || subscriptions.length === 0) {
+                  console.warn("⚠️ No subscriptions found.");
+                  return;
+                }
+
+                subscriptions.forEach(sub => {
+                  const subscription = {
+                    endpoint: sub.endpoint,
+                    keys: {
+                      p256dh: sub.p256dh,
+                      auth: sub.auth
+                    }
+                  };
+
+                  const maxAttempts = 3;
+                  let attempts = 0;
+
+                  const sendWithRetry = async () => {
+                    try {
+                      const payload = JSON.stringify({
+                        title: alert.title || "Cape Outage Alert",
+                        body: alert.description || "New unplanned water outage reported by City of Cape Town.",
+                        icon: "/images/manifest-icon-512.maskable.png",
+                        data: { url: `/alerts/${alert.Id}` }
+                      });
+
+                      await webpush.sendNotification(subscription, payload);
+                      console.log(`📨 Alert ${alert.Id} sent to ${subscription.endpoint}`);
+                    } catch (err) {
+                      attempts++;
+                      console.error(`❌ Push error (attempt ${attempts}):`, err);
+
+                      // Clean up stale subscriptions
+                      if (err.statusCode === 404 || err.statusCode === 410) {
+                        db.run(`DELETE FROM subscriptions WHERE endpoint = ?`, [subscription.endpoint], (delErr) => {
+                          if (delErr) {
+                            console.error("❌ Failed to delete stale subscription:", delErr.message);
+                          } else {
+                            console.log(`🧹 Deleted stale subscription: ${subscription.endpoint}`);
+                          }
+                        });
+                        return;
+                      }
+
+                      if (attempts >= maxAttempts || (err.statusCode && err.statusCode < 500)) {
+                        console.error("⚠️ Giving up on:", subscription.endpoint);
+                        return;
+                      }
+
+                      const delay = Math.pow(2, attempts) * 1000;
+                      console.log(`⏳ Retrying in ${delay}ms...`);
+                      setTimeout(sendWithRetry, delay);
+                    }
+                  };
+
+                  sendWithRetry();
+                });
+              });
+            }
+          });
+        });
+      });
+    } catch (error) {
+      console.error("❌ Error in notifyAlerts job:", error.message);
+    }
+  });
 };
 
 

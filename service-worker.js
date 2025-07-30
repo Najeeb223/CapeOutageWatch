@@ -20,3 +20,23 @@ self.addEventListener("push", e => {
     e.waitUntil(notificationPromise);
   });
   
+  self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+  
+    const targetUrl = event.notification.data?.url || '/';
+  
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+        // If a tab is already open, focus it
+        for (let client of windowClients) {
+          if (client.url.includes(targetUrl) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
+      })
+    );
+  });
+  
