@@ -117,31 +117,50 @@ const saveSubscriptions = () => {
 
 
 const insertAlertsToDb = async () => {
-    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
-    const alertData = await res.json();
+  const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+  const alertData = await res.json();
 
-    const insertPromises = alertData.map(alert => {
-        return new Promise((resolve, reject) => {
-            const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
-            db.get(checkSql, [alert.Id], (err, row) => {
-                if (err) return reject(err);
-                if (row.count === 0) {
-                    const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
-                    db.run(insertSql, [alert.Id], err => {
-                        if (err) return reject(err);
-                        resolve();
-                    });
-                } else {
-                    resolve(); 
-                }
-            });
-        });
-    });
+  const insertPromises = alertData.map(alert => {
+      return new Promise((resolve, reject) => {
+          const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
+          db.get(checkSql, [alert.Id], (err, row) => {
+              if (err) return reject(err);
+              if (row.count === 0) {
+                  const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
+                  db.run(insertSql, [alert.Id], err => {
+                      if (err) return reject(err);
+                      resolve();
+                  });
+              } else {
+                  resolve(); 
+              }
+          });
+      });
+  });
 
-    await Promise.all(insertPromises);
+  await Promise.all(insertPromises);
 };
 
-insertAlertsToDb().then(() => notifyAlerts());
+insertAlertsToDb().then(() => waitForSubscriptions());
+
+
+const waitForSubscriptions = () => {
+  db.get(`SELECT COUNT(*) as count FROM subscriptions`, (err, row) => {
+    if (err) {
+      console.error("❌ Failed to check subscriptions:", err.message);
+      return;
+    }
+
+    if (row.count > 0) {
+      console.log("✅ Subscriptions found, starting alert job...");
+      notifyAlerts();
+    } else {
+      console.warn("⏳ Waiting for at least one subscription...");
+      setTimeout(waitForSubscriptions, 10000); // retry in 10 seconds
+    }
+  });
+};
+
 
 
 const notifyAlerts = () => {
