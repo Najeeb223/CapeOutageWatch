@@ -40,7 +40,6 @@ async function renderAllAlerts() {
             card.innerHTML = `
                 <h3>Title</h3><p>${alert.title}</p>
                 <h3>Description</h3><p>${alert.description}</p>
-                <h3>Area</h3><p>${alert.area}</p>
                 <button class="view-alert-btn" data-id="${alert.Id}">View Alert</button>
             `;
             container.appendChild(card);
