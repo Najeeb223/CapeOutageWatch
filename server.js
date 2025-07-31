@@ -1,4 +1,4 @@
-/*
+
 const express = require('express');
 const port = process.env.PORT || 8000;
 const webpush = require('web-push');
@@ -166,10 +166,10 @@ const waitForSubscriptions = () => {
 
 const notifyAlerts = () => {
 
-*/
 
-//  const job = schedule.scheduleJob('*/10 * * * *', async () => {
-  /*
+
+  const job = schedule.scheduleJob('*/10 * * * *', async () => {
+  
   try {
       await insertAlertsToDb();
 
@@ -270,4 +270,3 @@ const notifyAlerts = () => {
 
 app.listen(port, () => console.log(`server is running on port ${port}`));
 
-*/
