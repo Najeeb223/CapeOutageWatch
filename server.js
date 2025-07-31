@@ -1,4 +1,3 @@
-
 const express = require('express');
 const port = process.env.PORT || 8000;
 const webpush = require('web-push');
@@ -11,7 +10,6 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 
-
 const apiKeys = {
     publicKey: "BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU",
     privateKey: "mV6oxKlW1Gq3Ss1eMoxDN0pp1rKiGi_8Ym5MYH-tY-0"
@@ -21,14 +19,11 @@ webpush.setVapidDetails(
     'mailto:najeebwarsame@gmail.com',
     apiKeys.publicKey,
     apiKeys.privateKey
-
 )
 
 app.use(express.static(__dirname));
-
 app.use(express.json());
 const schedule = require('node-schedule');
-
 
 app.get("/", (req, res) => {
     res.send("Hello World");
@@ -45,11 +40,22 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
     saveSubscriptions();
 });
 
-sql = `CREATE TABLE IF NOT EXISTS alerts (alertId INTEGER PRIMARY KEY)`;
+// Store full alert data, not just IDs
+sql = `CREATE TABLE IF NOT EXISTS alerts (
+    alertId INTEGER PRIMARY KEY,
+    title TEXT,
+    description TEXT,
+    area TEXT,
+    type TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`;
 db.run(sql);
 
 const createSentAlertsTable = () => {
-  const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (sentAlertId INTEGER PRIMARY KEY)`;
+  const sentAlertsSql = `CREATE TABLE IF NOT EXISTS sent_alerts (
+    sentAlertId INTEGER PRIMARY KEY,
+    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`;
   db.run(sentAlertsSql, (err) => {
     if (err) {
       console.error("❌ Failed to create sent_alerts table:", err.message);
@@ -64,10 +70,10 @@ const saveSubscriptions = () => {
   const sql = `CREATE TABLE IF NOT EXISTS subscriptions (
     endpoint TEXT PRIMARY KEY,
     p256dh TEXT,
-    auth TEXT
+    auth TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`;
 
-  // Create the subscriptions table and handle any creation errors
   db.run(sql, (err) => {
     if (err) {
       console.error("❌ Failed to create subscriptions table:", err.message);
@@ -112,38 +118,65 @@ const saveSubscriptions = () => {
   });
 };
 
-
-
-
-
-
+// Improved alert insertion with full data storage
 const insertAlertsToDb = async () => {
-  const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
-  const alertData = await res.json();
+  try {
+    const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
+    if (!res.ok) {
+      throw new Error(`API request failed: ${res.status}`);
+    }
+    
+    const alertData = await res.json();
+    console.log(`📊 Fetched ${alertData.length} alerts from API`);
 
-  const insertPromises = alertData.map(alert => {
-      return new Promise((resolve, reject) => {
-          const checkSql = `SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`;
-          db.get(checkSql, [alert.Id], (err, row) => {
-              if (err) return reject(err);
-              if (row.count === 0) {
-                  const insertSql = `INSERT INTO alerts(alertId) VALUES (?)`;
-                  db.run(insertSql, [alert.Id], err => {
-                      if (err) return reject(err);
-                      resolve();
-                  });
-              } else {
-                  resolve(); 
-              }
+    let newAlertsCount = 0;
+
+    for (const alert of alertData) {
+      try {
+        // Check if alert already exists
+        const existing = await new Promise((resolve, reject) => {
+          db.get(`SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`, [alert.Id], (err, row) => {
+            if (err) reject(err);
+            else resolve(row.count > 0);
           });
-      });
-  });
+        });
 
-  await Promise.all(insertPromises);
+        if (!existing) {
+          // Insert new alert with proper data mapping
+          await new Promise((resolve, reject) => {
+            const insertSql = `INSERT INTO alerts(alertId, title, description, area, type) VALUES (?, ?, ?, ?, ?)`;
+            db.run(insertSql, [
+              alert.Id,
+              alert.Title || alert.title || 'Service Alert',
+              alert.Description || alert.description || alert.Problem || 'Unplanned service interruption',
+              alert.Area || alert.area || alert.Location || 'Cape Town',
+              alert.Type || alert.type || 'Outage'
+            ], (err) => {
+              if (err) reject(err);
+              else {
+                console.log(`✅ New alert added to DB: ${alert.Id}`);
+                newAlertsCount++;
+                resolve();
+              }
+            });
+          });
+        }
+      } catch (error) {
+        console.error(`❌ Error processing alert ${alert.Id}:`, error.message);
+      }
+    }
+
+    console.log(`📈 Added ${newAlertsCount} new alerts to database`);
+    return newAlertsCount;
+    
+  } catch (error) {
+    console.error("❌ Error fetching/inserting alerts:", error.message);
+    return 0; // Return 0 on error to prevent notifications
+  }
 };
 
+// Initial DB population
 insertAlertsToDb().then(() => waitForSubscriptions());
-
 
 const waitForSubscriptions = () => {
   db.get(`SELECT COUNT(*) as count FROM subscriptions`, (err, row) => {
@@ -157,116 +190,193 @@ const waitForSubscriptions = () => {
       notifyAlerts();
     } else {
       console.warn("⏳ Waiting for at least one subscription...");
-      setTimeout(waitForSubscriptions, 10000); // retry in 10 seconds
+      setTimeout(waitForSubscriptions, 10000);
     }
   });
 };
 
-
-
+// FIXED: Bulletproof notification system
 const notifyAlerts = () => {
-
-
-
   const job = schedule.scheduleJob('*/10 * * * *', async () => {
-  
-  try {
-      await insertAlertsToDb();
+    console.log("🔄 Starting scheduled alert check...");
+    
+    try {
+      // First, check for new alerts from API
+      const newAlertsCount = await insertAlertsToDb();
+      
+      if (newAlertsCount === 0) {
+        console.log("✅ No new alerts found, skipping notifications");
+        return;
+      }
 
-      db.all(`SELECT * FROM alerts`, (err, alertData) => {
+      console.log(`🚨 Found ${newAlertsCount} new alerts - checking if they need notifications`);
+
+      // Get alerts that haven't been sent yet
+      const unsentAlertsSql = `
+        SELECT a.* FROM alerts a 
+        LEFT JOIN sent_alerts sa ON a.alertId = sa.sentAlertId 
+        WHERE sa.sentAlertId IS NULL
+        ORDER BY a.created_at DESC
+      `;
+
+      db.all(unsentAlertsSql, async (err, unsentAlerts) => {
         if (err) {
-          console.error("❌ Failed to fetch alerts from DB:", err.message);
+          console.error("❌ Failed to fetch unsent alerts:", err.message);
           return;
         }
 
-        if (!alertData || alertData.length === 0) {
-          console.warn("⚠️ No alerts found in DB.");
+        if (!unsentAlerts || unsentAlerts.length === 0) {
+          console.log("✅ No unsent alerts found");
           return;
         }
 
-        alertData.forEach(alert => {
-          const checkSql = `SELECT COUNT(*) as count FROM sent_alerts WHERE sentAlertId = ?`;
-          db.get(checkSql, [alert.Id], (err, row) => {
-            if (err) return console.error("❌ Check alert error:", err.message);
-            if (row.count === 0) {
-              const insertNewAlertSql = `INSERT INTO sent_alerts(sentAlertId) VALUES (?)`;
-              db.run(insertNewAlertSql, [alert.Id], err => {
-                if (err) return console.error("❌ Insert sent_alert failed:", err.message);
-              });
+        console.log(`📨 Processing ${unsentAlerts.length} unsent alerts`);
 
-              db.all(`SELECT * FROM subscriptions`, (err, subscriptions) => {
-                if (err) return console.error("❌ Failed to fetch subscriptions:", err.message);
-                if (!subscriptions || subscriptions.length === 0) {
-                  console.warn("⚠️ No subscriptions found.");
-                  return;
-                }
+        // Get all active subscriptions
+        db.all(`SELECT * FROM subscriptions`, async (err, subscriptions) => {
+          if (err) {
+            console.error("❌ Failed to fetch subscriptions:", err.message);
+            return;
+          }
 
-                subscriptions.forEach(sub => {
-                  const subscription = {
-                    endpoint: sub.endpoint,
-                    keys: {
-                      p256dh: sub.p256dh,
-                      auth: sub.auth
+          if (!subscriptions || subscriptions.length === 0) {
+            console.warn("⚠️ No subscriptions found");
+            return;
+          }
+
+          console.log(`👥 Ready to send to ${subscriptions.length} subscribers`);
+
+          // Process each unsent alert
+          for (const alert of unsentAlerts) {
+            try {
+              // Filter alerts for water/electrical outages
+              const alertText = `${alert.title || ''} ${alert.description || ''}`.toLowerCase();
+              const isWaterOutage = alertText.includes('water') || alertText.includes('aqua');
+              const isElectricalOutage = alertText.includes('electrical') || 
+                                       alertText.includes('electricity') ||
+                                       alertText.includes('power') ||
+                                       alertText.includes('load');
+
+              if (!isWaterOutage && !isElectricalOutage) {
+                console.log(`⏭️ Skipping non-relevant alert ${alert.alertId}: ${alert.title}`);
+                // Still mark as sent to avoid checking again
+                await markAlertAsSent(alert.alertId);
+                continue;
+              }
+
+              console.log(`🎯 Processing relevant ${isWaterOutage ? 'WATER' : 'ELECTRICAL'} alert ${alert.alertId}`);
+
+              // Mark as sent BEFORE sending to prevent duplicates
+              await markAlertAsSent(alert.alertId);
+
+              // Send to all subscribers
+              const notificationPromises = subscriptions.map(async (sub) => {
+                const subscription = {
+                  endpoint: sub.endpoint,
+                  keys: {
+                    p256dh: sub.p256dh,
+                    auth: sub.auth
+                  }
+                };
+
+                const outageType = isWaterOutage ? '💧 Water' : '⚡ Electrical';
+                const payload = JSON.stringify({
+                  title: `${outageType} Outage Alert`,
+                  body: alert.description || alert.title || 'New unplanned service interruption reported.',
+                  icon: "/images/manifest-icon-512.maskable.png",
+                  badge: "/images/manifest-icon-192.maskable.png",
+                  data: { 
+                    url: `/alerts/${alert.alertId}`,
+                    alertId: alert.alertId,
+                    type: isWaterOutage ? 'water' : 'electrical',
+                    timestamp: Date.now()
+                  },
+                  actions: [
+                    {
+                      action: 'view',
+                      title: 'View Details'
                     }
-                  };
-
-                  const maxAttempts = 3;
-                  let attempts = 0;
-
-                  const sendWithRetry = async () => {
-                    try {
-                      const payload = JSON.stringify({
-                        title: alert.title || "Cape Outage Alert",
-                        body: alert.description || "New unplanned water outage reported by City of Cape Town.",
-                        icon: "/images/manifest-icon-512.maskable.png",
-                        data: { url: `/alerts/${alert.Id}` }
-                      });
-
-                      await webpush.sendNotification(subscription, payload);
-                      console.log(`📨 Alert ${alert.Id} sent to ${subscription.endpoint}`);
-                    } catch (err) {
-                      attempts++;
-                      console.error(`❌ Push error (attempt ${attempts}):`, err);
-
-                      // Clean up stale subscriptions
-                      if (err.statusCode === 404 || err.statusCode === 410) {
-                        db.run(`DELETE FROM subscriptions WHERE endpoint = ?`, [subscription.endpoint], (delErr) => {
-                          if (delErr) {
-                            console.error("❌ Failed to delete stale subscription:", delErr.message);
-                          } else {
-                            console.log(`🧹 Deleted stale subscription: ${subscription.endpoint}`);
-                          }
-                        });
-                        return;
-                      }
-
-                      if (attempts >= maxAttempts || (err.statusCode && err.statusCode < 500)) {
-                        console.error("⚠️ Giving up on:", subscription.endpoint);
-                        return;
-                      }
-
-                      const delay = Math.pow(2, attempts) * 1000;
-                      console.log(`⏳ Retrying in ${delay}ms...`);
-                      setTimeout(sendWithRetry, delay);
-                    }
-                  };
-
-                  sendWithRetry();
+                  ],
+                  requireInteraction: true
                 });
+
+                return sendNotificationWithRetry(subscription, payload, alert.alertId);
               });
+
+              const results = await Promise.allSettled(notificationPromises);
+              const successful = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
+              console.log(`✅ Alert ${alert.alertId} sent to ${successful}/${subscriptions.length} subscribers`);
+
+            } catch (error) {
+              console.error(`❌ Error processing alert ${alert.alertId}:`, error.message);
             }
-          });
+          }
         });
       });
+
     } catch (error) {
-      console.error("❌ Error in notifyAlerts job:", error.message);
+      console.error("❌ Error in scheduled job:", error.message);
     }
+  });
+
+  console.log("⏰ Alert monitoring job scheduled (every 10 minutes)");
+};
+
+// Helper function to mark alert as sent
+const markAlertAsSent = (alertId) => {
+  return new Promise((resolve, reject) => {
+    const insertSentSql = `INSERT OR IGNORE INTO sent_alerts(sentAlertId) VALUES (?)`;
+    db.run(insertSentSql, [alertId], (err) => {
+      if (err) {
+        console.error(`❌ Failed to mark alert ${alertId} as sent:`, err.message);
+        reject(err);
+      } else {
+        console.log(`✅ Alert ${alertId} marked as sent`);
+        resolve();
+      }
+    });
   });
 };
 
+// Bulletproof notification sending with retry logic
+const sendNotificationWithRetry = async (subscription, payload, alertId, maxAttempts = 3) => {
+  let attempts = 0;
 
+  const attempt = async () => {
+    try {
+      await webpush.sendNotification(subscription, payload);
+      console.log(`📨 Alert ${alertId} sent successfully to ${subscription.endpoint.substring(0, 50)}...`);
+      return true;
+    } catch (err) {
+      attempts++;
+      console.error(`❌ Push error (attempt ${attempts}/${maxAttempts}):`, err.message);
 
+      // Handle stale subscriptions
+      if (err.statusCode === 404 || err.statusCode === 410) {
+        console.log(`🧹 Removing stale subscription: ${subscription.endpoint.substring(0, 50)}...`);
+        await new Promise((resolve) => {
+          db.run(`DELETE FROM subscriptions WHERE endpoint = ?`, [subscription.endpoint], () => {
+            resolve();
+          });
+        });
+        return false;
+      }
 
+      // Don't retry on client errors (4xx)
+      if (attempts >= maxAttempts || (err.statusCode && err.statusCode >= 400 && err.statusCode < 500)) {
+        console.error(`⚠️ Giving up on subscription: ${subscription.endpoint.substring(0, 50)}...`);
+        return false;
+      }
 
-app.listen(port, () => console.log(`server is running on port ${port}`));
+      // Exponential backoff for server errors
+      const delay = Math.pow(2, attempts) * 1000;
+      console.log(`⏳ Retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return attempt();
+    }
+  };
 
+  return attempt();
+};
+
+app.listen(port, () => console.log(`🚀 Cape Outage Watch server running on port ${port}`));
