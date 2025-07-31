@@ -231,6 +231,7 @@ const notifyAlerts = () => {
         }
 
         console.log(`📨 Processing ${unsentAlerts.length} unsent alerts`);
+        console.log("Unsent alerts:", unsentAlerts.map(a => a.alertId));
 
         // Get all active subscriptions
         db.all(`SELECT * FROM subscriptions`, async (err, subscriptions) => {
