@@ -33,6 +33,7 @@ self.addEventListener("push", e => {
             return client.focus();
           }
         }
+        // Otherwise, open a new one
         if (clients.openWindow) {
           return clients.openWindow(targetUrl);
         }
