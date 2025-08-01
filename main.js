@@ -36,74 +36,27 @@ async function renderAllAlerts() {
 
     alerts.forEach(alert => {
         if (alert.service_area === "Water & Sanitation" || alert.service_area === "Electricity") {
+            const formattedStart = formatCapeToDate(alert.start_timestamp);
+            const formattedEnd = formatCapeToDate(alert.forecast_end_timestamp);
+
             const card = document.createElement("div");
             card.innerHTML = `
                 <h3>Title</h3><p>${alert.title}</p>
                 <h3>Description</h3><p>${alert.description}</p>
-                <button class="view-alert-btn" data-id="${alert.Id}">View Alert</button>
+                <h3>Area</h3><p>${alert.area}</p>
+                <h3>Location</h3><p>${alert.location}</p>
+                <h3>Start Time</h3><p>${formattedStart}</p>
+                <h3>Forecasted End</h3><p>${formattedEnd}</p>
             `;
             container.appendChild(card);
         }
     });
-
-    document.querySelectorAll(".view-alert-btn").forEach(button => {
-        button.addEventListener('click', (e) => {
-            const alertId = e.target.dataset.id;
-            history.pushState({}, '', `/alerts/${alertId}`);
-            handleRouting();
-        });
-    });
-}
-
-async function renderAlertCard(alert) {
-    const container = document.querySelector(".planned-alerts-layout");
-    container.innerHTML = '';
-
-    const formattedStart = formatCapeToDate(alert.start_timestamp);
-    const formattedEnd = formatCapeToDate(alert.forecast_end_timestamp);
-
-    const card = document.createElement("div");
-    card.innerHTML = `
-        <h3>Title</h3><p>${alert.title}</p>
-        <h3>Description</h3><p>${alert.description}</p>
-        <h3>Area</h3><p>${alert.area}</p>
-        <h3>Location</h3><p>${alert.location}</p>
-        <h3>Start Time</h3><p>${formattedStart}</p>
-        <h3>Forecasted End</h3><p>${formattedEnd}</p>
-        <button id="back-to-list">Back to all alerts</button>
-    `;
-    container.appendChild(card);
-
-    document.getElementById('back-to-list').addEventListener('click', () => {
-        history.pushState({}, '', '/');
-        handleRouting();
-    });
 }
 
 async function handleRouting() {
-    const path = window.location.pathname;
-    const alertMatch = path.match(/^\/alerts\/(\d+)$/);
-
-    if (alertMatch) {
-        const alertId = alertMatch[1];
-        const alerts = await fetchAlerts();
-        const alert = alerts.find(a => String(a.Id) === alertId);
-        if (alert) {
-            renderAlertCard(alert);
-        } else {
-            const container = document.querySelector(".planned-alerts-layout");
-            container.innerHTML = `<p>Alert not found.</p><button id="back-to-list">Back to all alerts</button>`;
-            document.getElementById('back-to-list').addEventListener('click', () => {
-                history.pushState({}, '', '/');
-                handleRouting();
-            });
-        }
-    } else {
-        renderAllAlerts();
-    }
+    // Always show all alerts — no single alert mode anymore
+    renderAllAlerts();
 }
-
-// Push notification & service worker related code unchanged below
 
 const checkPermission = () => {
     if (!('serviceWorker' in navigator)) {
@@ -178,7 +131,6 @@ const main = async () => {
 
     handleRouting();
 };
-
 
 main().catch(console.error);
 
