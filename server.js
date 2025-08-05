@@ -247,10 +247,8 @@ const notifyAlerts = () => {
 
           console.log(`👥 Ready to send to ${subscriptions.length} subscribers`);
 
-          // Process each unsent alert
           for (const alert of unsentAlerts) {
             try {
-              // Filter alerts for water/electrical outages
               const alertText = `${alert.title || ''} ${alert.description || ''}`.toLowerCase();
               const isWaterOutage = alertText.includes('water') || alertText.includes('aqua');
               const isElectricalOutage = alertText.includes('electrical') || 
