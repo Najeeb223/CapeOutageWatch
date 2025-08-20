@@ -279,9 +279,16 @@ const notifyAlerts = () => {
                 };
 
                 const outageType = isWaterOutage ? '💧 Water' : '⚡ Electrical';
+
+                // Build a clean notification body with area/location always visible if available
+                const details = [alert.area, alert.location].filter(Boolean).join(" • ");
+                const description = alert.description || alert.title || "Unplanned service interruption";
+                
+                const body = details ? `${details} • ${description}` : description;
+                
                 const payload = JSON.stringify({
                   title: `${outageType} Outage Alert`,
-                  body: alert.description || alert.title || 'New unplanned service interruption reported.',
+                  body,
                   icon: "/images/manifest-icon-512.maskable.png",
                   badge: "/images/manifest-icon-192.maskable.png",
                   data: { 
@@ -298,6 +305,7 @@ const notifyAlerts = () => {
                   ],
                   requireInteraction: true
                 });
+                
 
                 return sendNotificationWithRetry(subscription, payload, alert.alertId);
               });
