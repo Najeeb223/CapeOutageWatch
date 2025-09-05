@@ -111,24 +111,34 @@ const saveSubscription = async (subscription) => {
 
 const main = async () => {
     checkPermission();
-    await requestNotificationPermission();
+    
+    // Check if already subscribed
     const registration = await registerSW();
-
-    let subscription = await registration.pushManager.getSubscription();
-
-    if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
-        });
-        console.log("📬 New subscription created");
+    const existingSubscription = await registration.pushManager.getSubscription();
+    
+    if (existingSubscription) {
+        console.log("🔔 Already subscribed");
+        document.getElementById('notification-setup').style.display = 'none';
     } else {
-        console.log("🔔 Existing subscription found, syncing with server");
+        // Show the enable button
+        document.getElementById('enable-notifications').onclick = async () => {
+            try {
+                await requestNotificationPermission();
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
+                });
+                
+                await saveSubscription(subscription);
+                console.log("✅ Notifications enabled!");
+                document.getElementById('notification-setup').style.display = 'none';
+            } catch (error) {
+                alert("Failed to enable notifications. Please try again.");
+                console.error(error);
+            }
+        };
     }
-
-    const response = await saveSubscription(subscription);
-    console.log("✅ Subscription saved:", response);
-
+    
     handleRouting();
 };
 
