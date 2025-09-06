@@ -118,7 +118,7 @@ const main = async () => {
     
     if (existingSubscription) {
         console.log("🔔 Already subscribed");
-        document.getElementById('notification-setup').style.display = 'none';
+     //   document.getElementById('notification-setup').style.display = 'none';
     } else {
         // Show the enable button
         document.getElementById('enable-notifications').onclick = async () => {
@@ -131,7 +131,7 @@ const main = async () => {
                 
                 await saveSubscription(subscription);
                 console.log("✅ Notifications enabled!");
-            //    document.getElementById('notification-setup').style.display = 'none';
+                document.getElementById('notification-setup').style.display = 'none';
             } catch (error) {
                 alert("Failed to enable notifications. Please try again.");
                 console.error(error);
