@@ -110,33 +110,25 @@ const saveSubscription = async (subscription) => {
 };
 
 const main = async () => {
-    checkPermission();
-    
-    // Check if already subscribed
-    const registration = await registerSW();
-    const existingSubscription = await registration.pushManager.getSubscription();
-    
-    if (existingSubscription) {
-        console.log("🔔 Already subscribed");
-     //   document.getElementById('notification-setup').style.display = 'none';
-    } else {
-        // Show the enable button
-        document.getElementById('enable-notifications').onclick = async () => {
-            try {
-                await requestNotificationPermission();
-                const subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
-                });
-                
-                await saveSubscription(subscription);
-                console.log("✅ Notifications enabled!");
-                document.getElementById('notification-setup').style.display = 'none';
-            } catch (error) {
-                alert("Failed to enable notifications. Please try again.");
-                console.error(error);
+    // Register service worker and handle subscription automatically
+    if ('serviceWorker' in navigator && 'Notification' in window && 'PushManager' in window) {
+        try {
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            
+            if (Notification.permission === 'granted') {
+                const existingSubscription = await registration.pushManager.getSubscription();
+                if (!existingSubscription) {
+                    const subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array("BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU")
+                    });
+                    await saveSubscription(subscription);
+                    console.log("✅ Notifications enabled!");
+                }
             }
-        };
+        } catch (error) {
+            console.error('Service worker registration failed:', error);
+        }
     }
     
     handleRouting();
