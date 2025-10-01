@@ -10,6 +10,8 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 
+// Server js update for frontend 
+
 const apiKeys = {
     publicKey: "BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU",
     privateKey: "mV6oxKlW1Gq3Ss1eMoxDN0pp1rKiGi_8Ym5MYH-tY-0"
