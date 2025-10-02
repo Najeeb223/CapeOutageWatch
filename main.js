@@ -1,4 +1,3 @@
-// Utility function for date formatting (kept as is)
 function formatCapeToDate(timestamp) {
     if (!timestamp) {
         return "Not specified";
