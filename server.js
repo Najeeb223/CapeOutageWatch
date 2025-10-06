@@ -288,26 +288,32 @@ const notifyAlerts = () => {
                 
                 const body = details ? `${details} • ${description}` : description;
                 
+                // After (Snippet 4): Setting the correct deep-link URL
+                // Note: Using alert.Id (as confirmed by your JSON)
+                const deepLinkUrl = `/index.html?alertId=${alert.Id}`;
+
                 const payload = JSON.stringify({
                   title: `${outageType} Outage Alert`,
                   body,
                   icon: "/images/manifest-icon-512.maskable.png",
                   badge: "/images/manifest-icon-192.maskable.png",
                   data: { 
-                    url: `/alerts/${alert.alertId}`,
-                    alertId: alert.alertId,
+                    // CRITICAL: The URL to open when the notification is clicked
+                    url: deepLinkUrl, 
+                    alertId: alert.Id, // Stays as Id for internal logic
                     type: isWaterOutage ? 'water' : 'electrical',
                     timestamp: Date.now()
                   },
                   actions: [
                     {
                       action: 'view',
-                      title: 'View Details'
+                      title: 'View Details',
+                      // Optional: Set the URL on the action button itself
+                      url: deepLinkUrl
                     }
                   ],
                   requireInteraction: true
                 });
-                
 
                 return sendNotificationWithRetry(subscription, payload, alert.alertId);
               });

@@ -72,3 +72,13 @@ body {
     
 }
 
+/* CSS for highlighting the deep-linked alert card */
+.highlight-alert {
+    border: 3px solid #ffcc00; /* Bright border for visibility */
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.8); /* Creates a subtle glow */
+    transition: all 0.5s ease-in-out; /* Makes the border/shadow appear smoothly */
+    /* Give it some breathing room if you don't use padding */
+    margin-top: 5px; 
+    margin-bottom: 5px;
+}
+
