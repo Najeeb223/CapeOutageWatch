@@ -35,23 +35,28 @@ async function renderAllAlerts() {
 
     const alerts = await fetchAlerts();
 
+   // NEW SNIPPET 1: Update the renderAllAlerts function in main.js
     alerts.forEach(alert => {
-        // Filter: Water & Sanitation + Electricity alerts only (as per context)
-        if (alert.service_area === "Water & Sanitation" || alert.service_area === "Electricity") {
-            const formattedStart = formatCapeToDate(alert.start_timestamp);
-            const formattedEnd = formatCapeToDate(alert.forecast_end_timestamp);
+    // Filter: Water & Sanitation + Electricity alerts only (as per context)
+    if (alert.service_area === "Water & Sanitation" || alert.service_area === "Electricity") {
+        const formattedStart = formatCapeToDate(alert.start_timestamp);
+        const formattedEnd = formatCapeToDate(alert.forecast_end_timestamp);
 
-            const card = document.createElement("div");
-            card.className = "alert-card"; // Added class for basic styling
-            card.innerHTML = `
-                <h3>Title</h3><p>${alert.title}</p>
-                <h3>Description</h3><p>${alert.description}</p>
-                <h3>Area</h3><p>${alert.area}</p>
-                <h3>Location</h3><p>${alert.location}</p>
-                <h3>Start Time</h3><p>${formattedStart}</p>
-                <h3>Forecasted End</h3><p>${formattedEnd}</p>
-            `;
-            container.appendChild(card);
+        const card = document.createElement("div");
+        card.className = "alert-card";
+        // *** CRITICAL ADDITION: Assign unique ID to the card ***
+        card.id = `alert-${alert.Id}`; // Using the alert ID from the API
+        // ********************************************************
+
+        card.innerHTML = `
+            <h3>Title</h3><p>${alert.title}</p>
+            <h3>Description</h3><p>${alert.description}</p>
+            <h3>Area</h3><p>${alert.area}</p>
+            <h3>Location</h3><p>${alert.location}</p>
+            <h3>Start Time</h3><p>${formattedStart}</p>
+            <h3>Forecasted End</h3><p>${formattedEnd}</p>
+        `;
+        container.appendChild(card);
         }
     });
 }
