@@ -23,6 +23,35 @@ function formatCapeToDate(timestamp) {
     }
 }
 
+// NEW SNIPPET 2: Function to scroll and highlight the deep-linked card
+    function scrollToAndHighlightAlert() {
+    // 1. Check the URL for the 'alertId' parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetAlertId = urlParams.get('alertId');
+
+    if (targetAlertId) {
+        // 2. Construct the full HTML ID (e.g., 'alert-37574')
+        const targetElementId = `alert-${targetAlertId}`;
+        const targetElement = document.getElementById(targetElementId);
+
+        if (targetElement) {
+            // 3. Scroll smoothly to the element
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // 4. Temporarily highlight the card (requires CSS, see notes below)
+            targetElement.classList.add('highlight-alert');
+            
+            // Remove the highlight after 4 seconds
+            setTimeout(() => {
+                targetElement.classList.remove('highlight-alert');
+            }, 4000); 
+
+            // 5. Clean the URL (Optional but recommended for a cleaner look)
+            // history.replaceState(null, '', window.location.pathname + window.location.hash);
+        }
+    }
+}
+
 // Fetching and rendering logic (kept as is)
 async function fetchAlerts() {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
@@ -61,8 +90,11 @@ async function renderAllAlerts() {
     });
 }
 
+// NEW SNIPPET 3: Update handleRouting to trigger the scroll after rendering
 async function handleRouting() {
-    renderAllAlerts();
+    await renderAllAlerts();
+    // CRITICAL: Call the scroll function only AFTER the cards are rendered
+    scrollToAndHighlightAlert(); 
 }
 
 // Utility to convert VAPID key (kept as is)
