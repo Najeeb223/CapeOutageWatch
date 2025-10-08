@@ -289,8 +289,8 @@ const notifyAlerts = () => {
                 const body = details ? `${details} • ${description}` : description;
                 
                 // After (Snippet 4): Setting the correct deep-link URL
-                // Note: Using alert.Id (as confirmed by your JSON)
-                const deepLinkUrl = `/index.html?alertId=${alert.Id}`;
+                // *** CRITICAL CORRECTION: Use the DB column name 'alertId' ***
+                const deepLinkUrl = `/index.html?alertId=${alert.alertId}`; // Using alert.alertId here
 
                 const payload = JSON.stringify({
                   title: `${outageType} Outage Alert`,
@@ -300,7 +300,7 @@ const notifyAlerts = () => {
                   data: { 
                     // CRITICAL: The URL to open when the notification is clicked
                     url: deepLinkUrl, 
-                    alertId: alert.Id, // Stays as Id for internal logic
+                    alertId: alert.alertId, // Correcting internal data field for consistency
                     type: isWaterOutage ? 'water' : 'electrical',
                     timestamp: Date.now()
                   },

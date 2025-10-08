@@ -73,9 +73,9 @@ async function renderAllAlerts() {
 
         const card = document.createElement("div");
         card.className = "alert-card";
-        // *** CRITICAL ADDITION: Assign unique ID to the card ***
-        card.id = `alert-${alert.Id}`; // Using the alert ID from the API
-        // ********************************************************
+        // *** CRITICAL CORRECTION: Use the DB column name 'alertId' ***
+        card.id = `alert-${alert.alertId}`; // Assuming DB returns 'alertId'
+        // ************************************************************
 
         card.innerHTML = `
             <h3>Title</h3><p>${alert.title}</p>
