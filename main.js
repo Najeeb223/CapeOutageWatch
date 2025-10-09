@@ -73,8 +73,9 @@ async function renderAllAlerts() {
 
         const card = document.createElement("div");
         card.className = "alert-card";
-        // *** CRITICAL CORRECTION: Use the DB column name 'alertId' ***
-        card.id = `alert-${alert.alertId}`; // Assuming DB returns 'alertId'
+        // *** CRITICAL CORRECTION (Revert): Use the API's property 'Id' ***
+        card.id = `alert-${alert.Id}`; // Use 'Id' for the frontend rendering
+        // ***************************************************************
         // ************************************************************
 
         card.innerHTML = `
@@ -93,8 +94,11 @@ async function renderAllAlerts() {
 // NEW SNIPPET 3: Update handleRouting to trigger the scroll after rendering
 async function handleRouting() {
     await renderAllAlerts();
-    // CRITICAL: Call the scroll function only AFTER the cards are rendered
-    scrollToAndHighlightAlert(); 
+    
+    // FINAL CRITICAL FIX: Add a small delay (e.g., 50ms) to ensure the DOM is fully rendered
+    setTimeout(() => {
+        scrollToAndHighlightAlert(); 
+    }, 50);
 }
 
 // Utility to convert VAPID key (kept as is)
