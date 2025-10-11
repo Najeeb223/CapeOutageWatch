@@ -69,31 +69,8 @@ body {
     margin: 0 auto;
 }
 
-.search-bar {
-    display: flex;
-    gap: 10px;
-    flex-grow: 1; /* Allows search bar to take up most of the space */
-    max-width: 500px;
-}
 
-#area-search-filter {
-    /* Retained for styling compatibility, but now managed by .search-bar */
-    display: flex; 
-    gap: 10px;
-    flex-grow: 1;
-}
 
-#area-search {
-    flex-grow: 1;
-    padding: 8px 12px;
-    border: 1px solid var(--color-dark-purple);
-    border-radius: 8px;
-    font-size: 1rem;
-    /* Overriding old fixed dimensions */
-    width: auto;
-    height: auto;
-    margin-bottom: 0;
-}
 
 .purple-button {
     padding: 10px 15px;
@@ -114,7 +91,7 @@ body {
     transform: scale(0.98);
 }
 
-#search-area-btn, #enableNotifications {
+#enableNotifications {
     /* Overriding old margin definitions for button placement */
     margin-bottom: 0;
 }
@@ -136,7 +113,6 @@ body {
     padding-bottom: 5px;
 }
 
-/* CRITICAL FIX: Overwriting the original container styles for a proper centered grid */
 /* This ensures the entire collection of cards is centered */
 .planned-alerts-layout {
     display: flex;
