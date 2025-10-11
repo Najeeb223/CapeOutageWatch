@@ -9,29 +9,41 @@
     <link rel="manifest" href="manifest.json" />
 </head>
 <body>
-    <header>
-        <h1>Cape Outage Watch (COW)</h1>
-        <button id="enableNotifications" style="
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 20px;
-        ">
-            🔔 Enable Outage Alerts
-        </button>
+    <!-- Main Header with Purple Theme -->
+    <header id="main-header">
+        <div class="header-content">
+            <!-- App Title - White Text, Purple Shadow (COW: White & Purple) -->
+            <h1 id="app-title">Cape Outage Watch (COW)</h1>
+            <!-- Menu icon for mobile navigation -->
+            <button id="menu-toggle" class="menu-icon">☰</button>
+        </div>
+        
+        <!-- Controls Bar for Notifications and Search -->
+        <div id="controls-bar">
+            <!-- Search/Filter Container -->
+            <div id="area-search-filter" class="search-bar">
+                <input type="text" id="area-search" placeholder="Search by area (e.g., Mitchells Plain)" aria-label="Search outage area" />
+                <button id="search-area-btn" class="purple-button">Search</button>
+            </div>
+            
+            <!-- Notification Button -->
+            <!-- Renaming to purple-button class -->
+            <button id="enableNotifications" class="purple-button">
+                🔔 Enable Outage Alerts
+            </button>
+        </div>
     </header>
 
-    <section>
-        <h2>COCT Unplanned Outages</h2>
+    <!-- Main Content Wrapper for Centering -->
+    <main id="main-content-wrapper">
+        <h2 class="section-heading">Active Outage Alerts</h2>
+        
+        <!-- CRITICAL: Retaining the original class name for the container -->
         <section class="planned-alerts-layout">
-            <p>Fetching alerts...</p>
+            <p class="loading-message">Fetching alerts...</p>
         </section>
-    </section>
+    </main>
 
-</body>
     <script src="main.js"></script>
+</body>
 </html>
