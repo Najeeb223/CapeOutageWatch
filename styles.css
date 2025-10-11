@@ -336,6 +336,11 @@ body {
     #mobile-menu.visible-menu {
         transform: translateX(0); /* End position: visible */
     }
+
+    .menu-item {
+        display: flex; 
+        align-items: center; 
+    }
 }
 
 /* --- Mobile Navigation Menu Positioning and Transition --- */
@@ -384,4 +389,19 @@ body {
 .menu-item:hover {
     background-color: var(--color-bg-light);
     color: var(--color-purple);
+}
+
+/* Style for the image itself - Set fixed, small size */
+.menu-icon-img {
+    width: 20px; 
+    height: 20px;
+    /* Keeps the image crisp if it's high resolution */
+    object-fit: contain; 
+}
+
+/* Ensure the link container aligns the image and text horizontally */
+.menu-github-link {
+    display: flex; 
+    align-items: center;
+    gap: 8px; /* Spacing between the icon and the word "GitHub" */
 }
