@@ -23,6 +23,38 @@ function formatCapeToDate(timestamp) {
     }
 }
 
+// Function to toggle the mobile menu visibility
+function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    // Toggle the class that controls the slide-in/slide-out transition defined in CSS
+    if (menu) {
+        menu.classList.toggle('visible-menu');
+    }
+}
+
+// --- Event Listeners Attachment ---
+
+// Add a listener to the burger icon to toggle the menu
+const menuToggle = document.getElementById('menu-toggle');
+if (menuToggle) {
+    menuToggle.addEventListener('click', toggleMenu);
+}
+
+// Optional: Add basic listeners to close the menu when a link is clicked
+const aboutLink = document.getElementById('about-link');
+const contactLink = document.getElementById('contact-link');
+
+if (aboutLink) {
+    aboutLink.addEventListener('click', toggleMenu); // Closes menu when clicked
+}
+
+if (contactLink) {
+    contactLink.addEventListener('click', toggleMenu); // Closes menu when clicked
+}
+
+// Note: Ensure this snippet runs after the DOM is fully loaded.
+
+
 // NEW SNIPPET 2: Function to scroll and highlight the deep-linked card
     function scrollToAndHighlightAlert() {
     // 1. Check the URL for the 'alertId' parameter

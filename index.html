@@ -12,19 +12,18 @@
     <!-- Main Header with Purple Theme -->
     <header id="main-header">
         <div class="header-content">
-            <!-- App Title - White Text, Purple Shadow (COW: White & Purple) -->
-            <h1 id="app-title">CapeOutageWatch (COW)</h1>
-            <!-- Menu icon for mobile navigation -->
+            <!-- 1. Burger Menu Icon (on the absolute left on mobile) -->
             <button id="menu-toggle" class="menu-icon">☰</button>
-        </div>
-        
-        <!-- Controls Bar for Notifications and Search -->
-        <div id="controls-bar">    
-            <!-- Notification Button -->
-            <!-- Renaming to purple-button class -->
-            <button id="enableNotifications" class="purple-button">
-                🔔 Enable Outage Alerts
-            </button>
+            
+            <!-- 2. App Title -->
+            <h1 id="app-title">CapeOutageWatch (COW)</h1>
+            
+            <!-- 3. Notification Button (moves to the side, potentially hidden/repositioned on small screen) -->
+            <div class="header-right-controls">
+                <button id="enableNotifications" class="purple-button">
+                    🔔 Enable Outage Alerts
+                </button>
+            </div>
         </div>
     </header>
 
@@ -37,6 +36,15 @@
             <p class="loading-message">Fetching alerts...</p>
         </section>
     </main>
+
+    <nav id="mobile-menu" class="hidden-menu">
+        <ul class="menu-list">
+            <!-- Links will be styled and controlled via JS/CSS -->
+            <li><a href="#" id="about-link" class="menu-item">ℹ️ About COW</a></li>
+            <li><a href="#" id="contact-link" class="menu-item">📧 Contact</a></li>
+            <li><a href="https://github.com/your-username/your-repo" target="_blank" class="menu-item">🐙 GitHub</a></li>
+        </ul>
+    </nav>
 
     <script src="main.js"></script>
 </body>

@@ -35,7 +35,7 @@ body {
 
 .header-content {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Ensures space between icon, title, and button group */
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
@@ -50,12 +50,16 @@ body {
 }
 
 .menu-icon {
-    display: none; /* Hidden on desktop */
-    font-size: 2rem;
+    display: none; /* Hidden on desktop by default */
+    font-size: 1.5rem; /* Responsive size: smaller than before */
+    padding: 5px 0;
     background: none;
     border: none;
     color: white;
     cursor: pointer;
+    text-align: left; 
+    width: 40px; 
+    height: 40px; 
 }
 
 /* Controls Bar (Search and Notifications) */
@@ -256,13 +260,22 @@ body {
 /* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
     
+    .header-content {
+        /* Align icon and title to the start/left */
+        justify-content: flex-start; 
+        gap: 15px; 
+    }
+    
     /* Header & Controls */
     #app-title {
-        font-size: 1.5rem;
+        flex-grow: 1; 
+        text-align: left; /* Aligns the title next to the icon */
     }
 
     .menu-icon {
-        display: block; /* Show burger menu icon */
+        display: block; /* Show burger icon on mobile */
+        order: -1; /* CRITICAL: Forces the icon to the absolute far left */
+        font-size: 1.5rem; 
     }
 
     #controls-bar {
@@ -271,12 +284,7 @@ body {
         gap: 10px;
         padding-top: 10px;
     }
-    
-    .search-bar {
-        width: 100%;
-        max-width: none;
-    }
-    
+        
     .purple-button {
         width: 100%;
         text-align: center;
@@ -307,4 +315,73 @@ body {
         margin-bottom: 10px; /* Separate value blocks */
         grid-column: auto;
     }
+
+    .header-right-controls {
+        /* Hide the large notification button from the header on mobile to save space */
+        display: none; 
+    }
+
+    /* We also need a placeholder rule for the sliding menu structure */
+    #mobile-menu {
+        position: fixed;
+        top: 75px; /* Adjust based on final header height */
+        left: 0;
+        width: 100%;
+        background-color: white;
+        z-index: 1000;
+        transform: translateX(-100%); /* Start position: hidden off-screen left */
+        transition: transform 0.3s ease-in-out;
+    }
+
+    #mobile-menu.visible-menu {
+        transform: translateX(0); /* End position: visible */
+    }
+}
+
+/* --- Mobile Navigation Menu Positioning and Transition --- */
+#mobile-menu {
+    position: fixed;
+    top: 75px; /* Adjust this value to sit just below your header */
+    left: 0;
+    width: 80%; /* Takes up 80% of the screen width */
+    max-width: 300px; /* Prevents it from being too wide on tablets */
+    background-color: white;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transform: translateX(-100%); /* Start hidden: pushed entirely off-screen to the left */
+    transition: transform 0.3s ease-in-out;
+}
+
+#mobile-menu.visible-menu {
+    transform: translateX(0); /* End position: visible */
+}
+
+/* Hide on Desktop */
+@media (min-width: 769px) {
+    #mobile-menu {
+        display: none !important;
+    }
+}
+
+/* --- Menu List and Item Styling --- */
+.menu-list {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.menu-item {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--color-text-dark); /* Assuming you have a dark text variable */
+    font-size: 1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--color-bg-light); /* Assuming a light background variable */
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: var(--color-bg-light);
+    color: var(--color-purple);
 }
