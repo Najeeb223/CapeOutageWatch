@@ -167,12 +167,33 @@ body {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    width: 350px; /* Fixed width for card consistency */
+    padding: 12px; /* Reduced from 15px */
+    width: 350px;
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-top: 5px solid var(--color-purple); /* Top border accent */
+    border-top: 5px solid var(--color-purple);
+}
+
+.alert-card h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0.4rem 0 0.2rem 0; /* Tighter margins */
+    color: #6b46c1;
+}
+
+.alert-card p {
+    font-size: 0.88rem;
+    margin: 0 0 0.6rem 0; /* Tighter bottom margin */
+    line-height: 1.35;
+}
+
+.alert-card h3:first-child {
+    margin-top: 0;
+}
+
+.alert-card p:last-child {
+    margin-bottom: 0;
 }
 
 .alert-card:hover {
