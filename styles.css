@@ -352,10 +352,10 @@ body {
 /* --- Mobile Navigation Menu Positioning and Transition --- */
 #mobile-menu {
     position: fixed;
-    top: 75px; /* Adjust this value to sit just below your header */
-    left: 0;
-    width: 80%; /* Takes up 80% of the screen width */
-    max-width: 300px; /* Prevents it from being too wide on tablets */
+    left: 0 !important; 
+    top: 75px; /* Sits just below the header */
+    width: 80%; 
+    max-width: 300px; 
     background-color: white;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -368,7 +368,7 @@ body {
 }
 
 /* Show sidebar on desktop - add this NEW rule */
-@media (min-width: 769px) {
+/* @media (min-width: 769px) {
     #mobile-menu {
         position: static;
         transform: translateX(0);
@@ -377,7 +377,7 @@ body {
         box-shadow: none;
         display: block;
     }
-}
+} */
 
 /* --- Menu List and Item Styling --- */
 .menu-list {
