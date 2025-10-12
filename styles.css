@@ -269,7 +269,7 @@ body {
     /* Header & Controls */
     #app-title {
         flex-grow: 1; 
-        text-align: left; /* Aligns the title next to the icon */
+        text-align: center; /* Changed from left to center */
     }
 
     .menu-icon {
@@ -314,11 +314,6 @@ body {
         font-weight: normal;
         margin-bottom: 10px; /* Separate value blocks */
         grid-column: auto;
-    }
-
-    .header-right-controls {
-        /* Hide the large notification button from the header on mobile to save space */
-        display: none; 
     }
 
     /* We also need a placeholder rule for the sliding menu structure */
