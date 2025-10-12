@@ -49,7 +49,6 @@ body {
     letter-spacing: 1px;
     text-shadow: 1px 1px 3px var(--color-dark-purple); /* Sleek purple accent on title */
     margin: 0;
-    padding-left: 120px;
 }
 
 .menu-icon {
@@ -264,15 +263,17 @@ body {
 @media (max-width: 768px) {
     
     .header-content {
-        /* Align icon and title to the start/left */
         justify-content: flex-start; 
-        gap: 15px; 
+        gap: 8px; /* Tighter gap */
+        padding: 0 10px; /* Add padding to prevent edge overflow */
     }
     
     /* Header & Controls */
     #app-title {
         flex-grow: 1; 
-        text-align: center; /* Changed from left to center */
+        text-align: center;
+        font-size: 1.2rem; /* Smaller on mobile */
+        padding-left: 0; /* Remove padding */
     }
 
     .menu-icon {
@@ -291,6 +292,8 @@ body {
     .purple-button {
         width: 100%;
         text-align: center;
+        font-size: 0.85rem; /* Smaller text */
+        padding: 8px 10px; /* Tighter padding */
     }
 
     /* Card Layout (Mobile) */
@@ -339,6 +342,11 @@ body {
         display: flex; 
         align-items: center; 
     }
+
+    .header-right-controls {
+        flex-shrink: 0; /* Prevent squishing */
+        min-width: 0; /* Allow wrapping if needed */
+    }
 }
 
 /* --- Mobile Navigation Menu Positioning and Transition --- */
@@ -357,6 +365,18 @@ body {
 
 #mobile-menu.visible-menu {
     transform: translateX(0); /* End position: visible */
+}
+
+/* Show sidebar on desktop - add this NEW rule */
+@media (min-width: 769px) {
+    #mobile-menu {
+        position: static;
+        transform: translateX(0);
+        width: auto;
+        max-width: none;
+        box-shadow: none;
+        display: block;
+    }
 }
 
 /* --- Menu List and Item Styling --- */

@@ -12,13 +12,27 @@
     <!-- Main Header with Purple Theme -->
     <header id="main-header">
         <div class="header-content">
-            <!-- 1. Burger Menu Icon (on the absolute left on mobile) -->
+            <!-- START: MOVED NAVIGATION MENU -->
+            <nav id="mobile-menu" class="hidden-menu">
+                <ul class="menu-list">`
+                    <li><a href="#" id="about-link" class="menu-item">ℹ️ About COW</a></li>
+                    <li>
+                        <a href="https://github.com/Najeeb223" target="_blank" class="menu-item menu-github-link">
+                            <img src="./images/github.png" alt="GitHub Logo" class="menu-icon-img">
+                            GitHub
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- END: MOVED NAVIGATION MENU -->
+    
+            <!-- 1. Burger Menu Icon (Keep this here) -->
             <button id="menu-toggle" class="menu-icon">☰</button>
             
-            <!-- 2. App Title -->
+            <!-- 2. App Title (Keep this here) -->
             <h2 id="app-title">CapeOutageWatch</h2>
             
-            <!-- 3. Notification Button (moves to the side, potentially hidden/repositioned on small screen) -->
+            <!-- 3. Notification Button... (Keep this here) -->
             <div class="header-right-controls">
                 <button id="enableNotifications" class="purple-button">
                     🔔 Enable Outage Alerts
@@ -36,20 +50,6 @@
             <p class="loading-message">Fetching alerts...</p>
         </section>
     </main>
-
-    <nav id="mobile-menu" class="hidden-menu">
-        <ul class="menu-list">
-            <!-- Links will be styled and controlled via JS/CSS -->
-            <li><a href="#" id="about-link" class="menu-item">ℹ️ About COW</a></li>
-            <li>
-                <a href="https://github.com/Najeeb223" target="_blank" class="menu-item menu-github-link">
-                    <img src="./images/github.png" alt="GitHub Logo" class="menu-icon-img">
-                    GitHub
-                </a>
-            </li>
-        </ul>
-    </nav>
-
     <script src="main.js"></script>
 </body>
 </html>
