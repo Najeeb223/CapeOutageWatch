@@ -42,11 +42,14 @@ body {
 }
 
 #app-title {
+    flex-grow: 1; 
+    text-align: center; 
     font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: 1px;
     text-shadow: 1px 1px 3px var(--color-dark-purple); /* Sleek purple accent on title */
     margin: 0;
+    padding-left: 120px;
 }
 
 .menu-icon {
@@ -354,13 +357,6 @@ body {
 
 #mobile-menu.visible-menu {
     transform: translateX(0); /* End position: visible */
-}
-
-/* Hide on Desktop */
-@media (min-width: 769px) {
-    #mobile-menu {
-        display: none !important;
-    }
 }
 
 /* --- Menu List and Item Styling --- */
