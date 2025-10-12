@@ -368,7 +368,7 @@ body {
 }
 
 /* Show sidebar on desktop - add this NEW rule */
-/* @media (min-width: 769px) {
+@media (min-width: 769px) {
     #mobile-menu {
         position: static;
         transform: translateX(0);
@@ -377,7 +377,7 @@ body {
         box-shadow: none;
         display: block;
     }
-} */
+}
 
 /* --- Menu List and Item Styling --- */
 .menu-list {
