@@ -23,6 +23,11 @@ function formatCapeToDate(timestamp) {
     }
 }
 
+    // Pagination state
+let currentPage = 1;
+const alertsPerPage = 9; // 9 cards per page (3x3 grid works well)
+let allFilteredAlerts = [];
+
 // Function to toggle the mobile menu visibility
 function toggleMenu() {
     const menu = document.getElementById('mobile-menu');
@@ -95,20 +100,26 @@ async function renderAllAlerts() {
     container.innerHTML = '';
 
     const alerts = await fetchAlerts();
+    
+    // Filter alerts
+    allFilteredAlerts = alerts.filter(alert => 
+        alert.service_area === "Water & Sanitation" || alert.service_area === "Electricity"
+    );
 
-   // NEW SNIPPET 1: Update the renderAllAlerts function in main.js
-    alerts.forEach(alert => {
-    // Filter: Water & Sanitation + Electricity alerts only (as per context)
-    if (alert.service_area === "Water & Sanitation" || alert.service_area === "Electricity") {
+    // Calculate pagination
+    const totalPages = Math.ceil(allFilteredAlerts.length / alertsPerPage);
+    const startIndex = (currentPage - 1) * alertsPerPage;
+    const endIndex = startIndex + alertsPerPage;
+    const alertsToShow = allFilteredAlerts.slice(startIndex, endIndex);
+
+    // Render cards for current page
+    alertsToShow.forEach(alert => {
         const formattedStart = formatCapeToDate(alert.start_timestamp);
         const formattedEnd = formatCapeToDate(alert.forecast_end_timestamp);
 
         const card = document.createElement("div");
         card.className = "alert-card";
-        // *** CRITICAL CORRECTION (Revert): Use the API's property 'Id' ***
-        card.id = `alert-${alert.Id}`; // Use 'Id' for the frontend rendering
-        // ***************************************************************
-        // ************************************************************
+        card.id = `alert-${alert.Id}`;
 
         card.innerHTML = `
             <h3>Title</h3><p>${alert.title}</p>
@@ -119,10 +130,44 @@ async function renderAllAlerts() {
             <h3>Forecasted End</h3><p>${formattedEnd}</p>
         `;
         container.appendChild(card);
-        }
     });
+
+    // Update pagination controls
+    updatePaginationControls(totalPages);
 }
 
+function updatePaginationControls(totalPages) {
+    const prevBtn = document.getElementById('prev-page-button');
+    const nextBtn = document.getElementById('next-page-button');
+    const pageInfo = document.getElementById('page-info');
+
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+
+    // Hide pagination if only 1 page
+    const paginationContainer = document.getElementById('pagination-controls');
+    paginationContainer.style.display = totalPages <= 1 ? 'none' : 'flex';
+}
+
+// Pagination button handlers - add after main() function
+document.getElementById('prev-page-button').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderAllAlerts();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+
+document.getElementById('next-page-button').addEventListener('click', () => {
+    const totalPages = Math.ceil(allFilteredAlerts.length / alertsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderAllAlerts();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
 // NEW SNIPPET 3: Update handleRouting to trigger the scroll after rendering
 async function handleRouting() {
     await renderAllAlerts();
