@@ -119,6 +119,46 @@ body {
     padding-bottom: 5px;
 }
 
+.notification-intro {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.intro-text {
+    margin-top: 15px;
+    color: var(--color-text-dark);
+    font-size: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#main-footer {
+    text-align: center;
+    padding: 20px;
+    background-color: var(--color-purple);
+    color: white;
+    margin-top: 40px;
+}
+
+.footer-logo {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+}
+
+/* Fix sidebar for desktop - always visible in corner */
+@media (min-width: 769px) {
+    #mobile-menu {
+        position: fixed !important;
+        top: 75px !important;
+        left: 0 !important;
+        transform: translateX(0) !important;
+        width: 200px !important;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+}
+
 /* This ensures the entire collection of cards is centered */
 .planned-alerts-layout {
     display: flex;

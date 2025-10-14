@@ -39,18 +39,19 @@
             
             <!-- 2. App Title (Keep this here) -->
             <h3 id="app-title">CapeOutageWatch</h3>
-            
-            <!-- 3. Notification Button... (Keep this here) -->
-            <div class="header-right-controls">
-                <button id="enableNotifications" class="purple-button">
-                    🔔 Enable Outage Alerts
-                </button>
-            </div>
         </div>
     </header>
 
     <!-- Main Content Wrapper for Centering -->
     <main id="main-content-wrapper">
+
+        <div class="notification-intro">
+            <button id="enableNotifications" class="purple-button">
+                🔔 Enable Outage Alerts
+            </button>
+            <p class="intro-text">Get instant push notifications about water and electricity outages in Cape Town. Stay informed and plan ahead.</p>
+        </div>
+        
         <h2 class="section-heading">Active Outage Alerts</h2>
         
         <!-- CRITICAL: Retaining the original class name for the container -->
@@ -65,5 +66,9 @@
     </div>
     </main>
     <script src="main.js"></script>
+    <footer id="main-footer">
+        <img src="./images/manifest-icon-192.maskable.png" alt="COW Logo" class="footer-logo">
+        <p>&copy; 2025 CapeOutageWatch</p>
+    </footer>
 </body>
 </html>
