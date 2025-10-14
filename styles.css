@@ -133,19 +133,6 @@ body {
     margin-right: auto;
 }
 
-#main-footer {
-    text-align: center;
-    padding: 20px;
-    background-color: var(--color-purple);
-    color: white;
-    margin-top: 40px;
-}
-
-.footer-logo {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 10px;
-}
 
 /* Fix sidebar for desktop - always visible in corner */
 @media (min-width: 769px) {
