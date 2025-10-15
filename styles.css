@@ -134,15 +134,26 @@ body {
 }
 
 
-/* Fix sidebar for desktop - always visible in corner */
+/* Desktop sidebar - remove sticky, make it toggle like mobile */
 @media (min-width: 769px) {
     #mobile-menu {
         position: fixed !important;
         top: 75px !important;
         left: 0 !important;
-        transform: translateX(0) !important;
         width: 200px !important;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        transform: translateX(-100%) !important; /* Hidden by default */
+        transition: transform 0.3s ease-in-out;
+        z-index: 1000;
+        background-color: white;
+    }
+    
+    #mobile-menu.visible-menu {
+        transform: translateX(0) !important; /* Slides in when clicked */
+    }
+    
+    .menu-icon {
+        display: block !important; /* Show burger on desktop too */
     }
 }
 
@@ -353,7 +364,7 @@ body {
     #mobile-menu {
         position: fixed;
         top: 75px; /* Adjust based on final header height */
-        left: 0;
+        left: -5px !important;
         width: 100%;
         background-color: white;
         z-index: 1000;
@@ -394,17 +405,7 @@ body {
     transform: translateX(0); /* End position: visible */
 }
 
-/* Show sidebar on desktop - add this NEW rule */
-@media (min-width: 769px) {
-    #mobile-menu {
-        position: static;
-        transform: translateX(0);
-        width: auto;
-        max-width: none;
-        box-shadow: none;
-        display: block;
-    }
-}
+
 
 /* --- Menu List and Item Styling --- */
 .menu-list {
@@ -462,10 +463,26 @@ body {
     text-align: center;
 }
 
-/* Responsive adjustment for small screens */
-@media (max-width: 600px) {
+/* Mobile pagination - side by side compact buttons */
+@media (max-width: 768px) {
     .pagination-controls-container {
-        flex-direction: column;
+        flex-direction: row !important; /* Override stacking */
         gap: 10px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    .pagination-controls-container .purple-button {
+        width: auto !important; /* Remove full width */
+        flex: 0 0 auto;
+        padding: 8px 12px; /* Compact sizing */
+        font-size: 0.8rem;
+    }
+    
+    .page-info-text {
+        width: 100%;
+        order: -1; /* Put page counter on top */
+        margin-bottom: 8px;
+        font-size: 0.95rem;
     }
 }
