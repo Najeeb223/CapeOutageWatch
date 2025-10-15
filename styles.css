@@ -142,18 +142,24 @@ body {
         left: 0 !important;
         width: 200px !important;
         box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        transform: translateX(-100%) !important; /* Hidden by default */
+        transform: translateX(-100%) !important;
         transition: transform 0.3s ease-in-out;
         z-index: 1000;
         background-color: white;
     }
     
     #mobile-menu.visible-menu {
-        transform: translateX(0) !important; /* Slides in when clicked */
+        transform: translateX(0) !important;
     }
     
     .menu-icon {
-        display: block !important; /* Show burger on desktop too */
+        display: block !important;
+        order: -1 !important; 
+        margin-right: 10px;
+    }
+
+    .header-content {
+        justify-content: flex-start !important; /* Align to left */
     }
 }
 

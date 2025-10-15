@@ -3,14 +3,12 @@ const port = process.env.PORT || 8000;
 const webpush = require('web-push');
 const sqlite3 = require('sqlite3').verbose();
 
-//utility to help with file paths
 const path = require('path');
 
 const app = express();
 const cors = require("cors");
 app.use(cors());
 
-// Server js update for frontend 
 
 const apiKeys = {
     publicKey: "BKFjG_8SqCnVM0QHL_xSni4szqp-ELnkhK6JxsE7VWbhTM8d5CF0Yu4zjb-qFMcRWEf0PGo7SSiiD0R7w_XLakU",
@@ -42,7 +40,6 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
     saveSubscriptions();
 });
 
-// Store full alert data, not just IDs
 sql = `CREATE TABLE IF NOT EXISTS alerts (
     alertId INTEGER PRIMARY KEY,
     title TEXT,
@@ -120,7 +117,6 @@ const saveSubscriptions = () => {
   });
 };
 
-// Improved alert insertion with full data storage
 const insertAlertsToDb = async () => {
   try {
     const res = await fetch('https://service-alerts.cct-datascience.xyz/coct-service_alerts-current-unplanned.json');
@@ -135,7 +131,6 @@ const insertAlertsToDb = async () => {
 
     for (const alert of alertData) {
       try {
-        // Check if alert already exists
         const existing = await new Promise((resolve, reject) => {
           db.get(`SELECT COUNT(*) as count FROM alerts WHERE alertId = ?`, [alert.Id], (err, row) => {
             if (err) reject(err);
@@ -144,7 +139,6 @@ const insertAlertsToDb = async () => {
         });
 
         if (!existing) {
-          // Insert new alert with proper data mapping
           await new Promise((resolve, reject) => {
             const insertSql = `INSERT INTO alerts(alertId, title, description, area, type) VALUES (?, ?, ?, ?, ?)`;
             db.run(insertSql, [
@@ -173,11 +167,10 @@ const insertAlertsToDb = async () => {
     
   } catch (error) {
     console.error("❌ Error fetching/inserting alerts:", error.message);
-    return 0; // Return 0 on error to prevent notifications
+    return 0; 
   }
 };
 
-// Initial DB population
 insertAlertsToDb().then(() => waitForSubscriptions());
 
 const waitForSubscriptions = () => {
@@ -197,13 +190,11 @@ const waitForSubscriptions = () => {
   });
 };
 
-// FIXED: Bulletproof notification system
 const notifyAlerts = () => {
   const job = schedule.scheduleJob('*/10 * * * *', async () => {
     console.log("🔄 Starting scheduled alert check...");
     
     try {
-      // First, check for new alerts from API
       const newAlertsCount = await insertAlertsToDb();
       
       if (newAlertsCount === 0) {
@@ -213,7 +204,6 @@ const notifyAlerts = () => {
 
       console.log(`🚨 Found ${newAlertsCount} new alerts - checking if they need notifications`);
 
-      // Get alerts that haven't been sent yet
       const unsentAlertsSql = `
         SELECT a.* FROM alerts a 
         LEFT JOIN sent_alerts sa ON a.alertId = sa.sentAlertId 
@@ -235,7 +225,6 @@ const notifyAlerts = () => {
         console.log(`📨 Processing ${unsentAlerts.length} unsent alerts`);
         console.log("Unsent alerts:", unsentAlerts.map(a => a.alertId));
 
-        // Get all active subscriptions
         db.all(`SELECT * FROM subscriptions`, async (err, subscriptions) => {
           if (err) {
             console.error("❌ Failed to fetch subscriptions:", err.message);
@@ -260,17 +249,14 @@ const notifyAlerts = () => {
 
               if (!isWaterOutage && !isElectricalOutage) {
                 console.log(`⏭️ Skipping non-relevant alert ${alert.alertId}: ${alert.title}`);
-                // Still mark as sent to avoid checking again
                 await markAlertAsSent(alert.alertId);
                 continue;
               }
 
               console.log(`🎯 Processing relevant ${isWaterOutage ? 'WATER' : 'ELECTRICAL'} alert ${alert.alertId}`);
 
-              // Mark as sent BEFORE sending to prevent duplicates
               await markAlertAsSent(alert.alertId);
 
-              // Send to all subscribers
               const notificationPromises = subscriptions.map(async (sub) => {
                 const subscription = {
                   endpoint: sub.endpoint,
@@ -282,15 +268,13 @@ const notifyAlerts = () => {
 
                 const outageType = isWaterOutage ? '💧 Water' : '⚡ Electrical';
 
-                // Build a clean notification body with area/location always visible if available
                 const details = [alert.area, alert.location].filter(Boolean).join(" • ");
                 const description = alert.description || alert.title || "Unplanned service interruption";
                 
                 const body = details ? `${details} • ${description}` : description;
                 
-                // After (Snippet 4): Setting the correct deep-link URL
-                // *** CRITICAL CORRECTION: Use the DB column name 'alertId' ***
-                const deepLinkUrl = `/index.html?alertId=${alert.alertId}`; // Using alert.alertId here
+                
+                const deepLinkUrl = `/index.html?alertId=${alert.alertId}`; 
 
                 const payload = JSON.stringify({
                   title: `${outageType} Outage Alert`,
@@ -298,9 +282,8 @@ const notifyAlerts = () => {
                   icon: "/images/manifest-icon-512.maskable.png",
                   badge: "/images/manifest-icon-192.maskable.png",
                   data: { 
-                    // CRITICAL: The URL to open when the notification is clicked
                     url: deepLinkUrl, 
-                    alertId: alert.alertId, // Correcting internal data field for consistency
+                    alertId: alert.alertId, 
                     type: isWaterOutage ? 'water' : 'electrical',
                     timestamp: Date.now()
                   },
@@ -308,7 +291,6 @@ const notifyAlerts = () => {
                     {
                       action: 'view',
                       title: 'View Details',
-                      // Optional: Set the URL on the action button itself
                       url: deepLinkUrl
                     }
                   ],
@@ -337,7 +319,6 @@ const notifyAlerts = () => {
   console.log("⏰ Alert monitoring job scheduled (every 10 minutes)");
 };
 
-// Helper function to mark alert as sent
 const markAlertAsSent = (alertId) => {
   return new Promise((resolve, reject) => {
     const insertSentSql = `INSERT OR IGNORE INTO sent_alerts(sentAlertId) VALUES (?)`;
@@ -353,7 +334,6 @@ const markAlertAsSent = (alertId) => {
   });
 };
 
-// Bulletproof notification sending with retry logic
 const sendNotificationWithRetry = async (subscription, payload, alertId, maxAttempts = 3) => {
   let attempts = 0;
 
@@ -366,7 +346,6 @@ const sendNotificationWithRetry = async (subscription, payload, alertId, maxAtte
       attempts++;
       console.error(`❌ Push error (attempt ${attempts}/${maxAttempts}):`, err.message);
 
-      // Handle stale subscriptions
       if (err.statusCode === 404 || err.statusCode === 410) {
         console.log(`🧹 Removing stale subscription: ${subscription.endpoint.substring(0, 50)}...`);
         await new Promise((resolve) => {
@@ -377,13 +356,11 @@ const sendNotificationWithRetry = async (subscription, payload, alertId, maxAtte
         return false;
       }
 
-      // Don't retry on client errors (4xx)
       if (attempts >= maxAttempts || (err.statusCode && err.statusCode >= 400 && err.statusCode < 500)) {
         console.error(`⚠️ Giving up on subscription: ${subscription.endpoint.substring(0, 50)}...`);
         return false;
       }
 
-      // Exponential backoff for server errors
       const delay = Math.pow(2, attempts) * 1000;
       console.log(`⏳ Retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
