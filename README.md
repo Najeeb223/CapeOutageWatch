@@ -1,4 +1,4 @@
-# 💧 CapeOutageWatch (COW)
+# 🚨 CapeOutageWatch (COW)
 
 > A Progressive Web App (PWA) built to notify Cape Town residents of unplanned water outages through real-time push notifications.
 
