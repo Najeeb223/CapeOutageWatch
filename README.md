@@ -42,8 +42,6 @@ I began researching how outage information was actually disseminated and discove
 ## 🤝 Acknowledgements
 
 * [City of Cape Town](https://github.com/cityofcapetown) for their transparent, well-documented public alerts API
-* Gordon (Lead Data Engineer) for valuable insight into their verification and alerting process
-
 ---
 
 ## 🌐 Live Demo
